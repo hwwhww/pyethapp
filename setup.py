@@ -32,6 +32,7 @@ LONG_DESCRIPTION = README + '\n\n' + HISTORY
 
 INSTALL_REQUIRES_REPLACEMENTS = {
     'https://github.com/ethereum/ethash/tarball/master#egg=pyethash': 'pyethash',
+    'git+git://github.com/hwwhww/sharding.git@pyethapp#egg=sharding': 'sharding',
 }
 
 INSTALL_REQUIRES = list()
@@ -55,6 +56,9 @@ if os.environ.get("USE_PYETHEREUM_DEVELOP"):
         'http://github.com/ethereum/pydevp2p/tarball/%s#egg=devp2p-9.99.9' % devp2p_ref,
         'http://github.com/ethereum/pyethereum/tarball/%s#egg=ethereum-9.99.9' % pyethereum_ref,
         ]
+
+# sharding has not been released
+DEPENDENCY_LINKS.append('http://github.com/hwwhww/sharding/tarball/pyethapp#egg=sharding-9.99.9')
 
 # *IMPORTANT*: Don't manually change the version here. Use the 'bump2version' utility.
 # see: https://github.com/ethereum/pyethapp/wiki/Development:-Versions-and-Releases

@@ -16,7 +16,7 @@ from devp2p.service import WiredService
 
 from ethereum.block import Block
 from ethereum.meta import make_head_candidate
-from ethereum.pow.chain import Chain
+from sharding.main_chain import MainChain as Chain
 from ethereum.pow.consensus import initialize, check_pow
 from ethereum.config import Env
 from ethereum.genesis_helpers import mk_genesis_data

@@ -18,3 +18,4 @@ pbkdf2
 scrypt
 pexpect
 pyelliptic==1.5.7
+git+git://github.com/hwwhww/sharding.git@pyethapp#egg=sharding
