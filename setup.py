@@ -50,15 +50,16 @@ INSTALL_REQUIRES = list(set(INSTALL_REQUIRES))
 DEPENDENCY_LINKS = []
 if os.environ.get("USE_PYETHEREUM_DEVELOP"):
     # Force installation of specific commits of devp2p and pyethereum.
-    devp2p_ref='525e15a9967da3174ec9e4e367b5adfb76138bb4'
-    pyethereum_ref='8edc5954fb8b6697cb7c9d7d85ed71e5f6d74e0f'
+    devp2p_ref = '525e15a9967da3174ec9e4e367b5adfb76138bb4'
+    pyethereum_ref = '8edc5954fb8b6697cb7c9d7d85ed71e5f6d74e0f'
     DEPENDENCY_LINKS = [
         'http://github.com/ethereum/pydevp2p/tarball/%s#egg=devp2p-9.99.9' % devp2p_ref,
         'http://github.com/ethereum/pyethereum/tarball/%s#egg=ethereum-9.99.9' % pyethereum_ref,
         ]
 
 # sharding has not been released
-DEPENDENCY_LINKS.append('http://github.com/hwwhww/sharding/tarball/pyethapp#egg=sharding-9.99.9')
+sharding_ref = '57cc097c4c22a8559205fcab79d28a12193b7fb5'
+DEPENDENCY_LINKS.append('http://github.com/hwwhww/sharding/tarball/pyethapp/%s#egg=sharding-9.99.9' % sharding_ref)
 
 # *IMPORTANT*: Don't manually change the version here. Use the 'bump2version' utility.
 # see: https://github.com/ethereum/pyethapp/wiki/Development:-Versions-and-Releases
