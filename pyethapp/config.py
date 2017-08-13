@@ -212,6 +212,8 @@ def update_config_from_genesis_json(config, genesis_json_filename_or_dict):
     config.setdefault('eth', {}).setdefault('block', {})
     ethblock_config = config['eth']['block']
 
+    config.setdefault('shd', {}).setdefault('collation', {})
+
     def _dec(data):
         return decode_hex(remove_0x_head(data))
 
