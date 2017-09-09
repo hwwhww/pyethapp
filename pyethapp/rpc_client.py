@@ -1,4 +1,5 @@
 """ A simple way of interacting to a ethereum node through JSON RPC commands. """
+from __future__ import print_function
 import logging
 import warnings
 import json
@@ -368,8 +369,8 @@ class JSONRPCClient(object):
         request = self.protocol.create_request(method, args)
         reply = self.transport.send_message(request.serialize())
         if self.print_communication:
-            print json.dumps(json.loads(request.serialize()), indent=2)
-            print reply
+            print(json.dumps(json.loads(request.serialize()), indent=2))
+            print(reply)
 
         jsonrpc_reply = self.protocol.parse_reply(reply)
         if isinstance(jsonrpc_reply, JSONRPCSuccessResponse):

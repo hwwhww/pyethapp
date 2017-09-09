@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import inspect
 from copy import deepcopy
@@ -19,12 +21,12 @@ import gevent.queue
 import gevent.wsgi
 import rlp
 from decorator import decorator
-from accounts import Account
+from .accounts import Account
 from devp2p.service import BaseService
 from ethereum.exceptions import InvalidTransaction
 from ethereum.trie import Trie
-from eth_protocol import ETHProtocol
-from ipc_rpc import bind_unix_listener, serve
+from .eth_protocol import ETHProtocol
+from .ipc_rpc import bind_unix_listener, serve
 from tinyrpc.dispatch import public as public_
 from tinyrpc.dispatch import RPCDispatcher
 from tinyrpc.exc import BadRequestError, MethodNotFoundError
@@ -87,8 +89,8 @@ def public(f):
             raise JSONRPCInvalidParamsError(t)
         else:
             return f(*args, **kwargs)
-    new_f.func_name = f.func_name
-    new_f.func_doc = f.func_doc
+    new_f.__name__ = f.__name__
+    new_f.__doc__ = f.__doc__
     return public_(new_f)
 
 
@@ -1004,7 +1006,7 @@ class Chain(Subdispatcher):
 
     @public
     def getWork(self):
-        print 'Sending work...'
+        print('Sending work...')
         h = self.chain.head_candidate
         return [
             encode_hex(h.header.mining_hash),
@@ -1014,7 +1016,7 @@ class Chain(Subdispatcher):
 
     @public
     def test(self, nonce):
-        print 80808080808
+        print(80808080808)
         return nonce
 
     @public
@@ -1035,24 +1037,24 @@ class Chain(Subdispatcher):
     @decode_arg('mining_hash', data_decoder)
     @decode_arg('mix_digest', data_decoder)
     def submitWork(self, nonce, mining_hash, mix_digest):
-        print 'submitting work'
+        print('submitting work')
         h = self.chain.head_candidate
-        print 'header: %s' % encode_hex(rlp.encode(h))
+        print('header: %s' % encode_hex(rlp.encode(h)))
         if h.header.mining_hash != mining_hash:
             return False
-        print 'mining hash: %s' % encode_hex(mining_hash)
-        print 'nonce: %s' % encode_hex(nonce)
-        print 'mixhash: %s' % encode_hex(mix_digest)
-        print 'seed: %s' % encode_hex(h.header.seed)
+        print('mining hash: %s' % encode_hex(mining_hash))
+        print('nonce: %s' % encode_hex(nonce))
+        print('mixhash: %s' % encode_hex(mix_digest))
+        print('seed: %s' % encode_hex(h.header.seed))
         h.header.nonce = nonce
         h.header.mixhash = mix_digest
         if not self.chain.check_header(h.header):
-            print 'PoW check false'
+            print('PoW check false')
             return False
-        print 'PoW check true'
+        print('PoW check true')
         self.chain.chain.add_block(h)
         self.chain.broadcast_newblock(h)
-        print 'Added: %d' % h.header.number
+        print('Added: %d' % h.header.number)
         return True
 
     @public
@@ -1360,7 +1362,7 @@ class LogFilter(object):
 
         # skip blocks that have already been checked
         if self.last_block_checked is not None:
-            print self.last_block_checked
+            print(self.last_block_checked)
             first = max(self.last_block_checked.number + 1, first)
             if first > last:
                 return {}
@@ -1417,7 +1419,7 @@ class LogFilter(object):
                     if bloom.bloom_combine(_bloom, _topic_bloom) != _bloom:
                         continue
                 block = self.chain.get_block(block)
-                print 'bloom filter passed'
+                print('bloom filter passed')
             logger.debug('-')
             logger.debug('with block', block=block)
             receipts = self.chainservice.get_receipts(block)
@@ -1727,7 +1729,7 @@ if __name__ == '__main__':
     def show_methods(dispatcher, prefix=''):
         # https://github.com/micheles/decorator/blob/3.4.1/documentation.rst
         for name, method in dispatcher.method_map.items():
-            print prefix + name, inspect.formatargspec(public_methods[name])
+            print(prefix + name, inspect.formatargspec(public_methods[name]))
         for sub_prefix, subdispatcher_list in dispatcher.subdispatchers.items():
             for sub in subdispatcher_list:
                 show_methods(sub, prefix + sub_prefix)

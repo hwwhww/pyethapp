@@ -16,6 +16,8 @@ todo:
 
 
 """
+from __future__ import print_function
+from __future__ import absolute_import
 import os
 import copy
 import click
@@ -25,7 +27,7 @@ import yaml
 import ethereum.slogging as slogging
 from devp2p.service import BaseService
 from devp2p.app import BaseApp
-from accounts import mk_random_privkey
+from .accounts import mk_random_privkey
 from ethereum.tools.keys import decode_hex
 from ethereum.utils import parse_int_or_hex, remove_0x_head
 
@@ -76,7 +78,7 @@ def validate_alt_config_file(ctx, param, value):
     if value:
         try:
             yaml_ = load_config(value)
-        except IOError, e:
+        except IOError as e:
             raise click.BadParameter(str(e))
         else:
             if not isinstance(yaml_, dict):
@@ -164,7 +166,7 @@ def dump_config(config):
         konfig['accounts']['privkeys_hex'] = [mask(key) for key in konfig['accounts']['privkeys_hex']]
     if len(konfig.get('node', {}).get('privkey_hex')):
         konfig['node']['privkey_hex'] = mask(konfig['node']['privkey_hex'])
-    print yaml.dump(konfig)
+    print(yaml.dump(konfig))
 
 
 def update_config_from_genesis_json(config, genesis_json_filename_or_dict):

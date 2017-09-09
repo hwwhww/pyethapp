@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Derived from https://groups.google.com/d/topic/gevent/5__B9hOup38/discussion
 """
+from __future__ import print_function
 import _socket
 import os
 import pwd
@@ -12,7 +13,7 @@ def unlink(path):
     from errno import ENOENT
     try:
         os.unlink(path)
-    except OSError, ex:
+    except OSError as ex:
         if ex.errno != ENOENT:
             raise
 
@@ -21,7 +22,7 @@ def link(src, dest):
     from errno import ENOENT
     try:
         os.link(src, dest)
-    except OSError, ex:
+    except OSError as ex:
         if ex.errno != ENOENT:
             raise
 
@@ -42,7 +43,7 @@ def bind_unix_listener(path, backlog=50, user=None):
             if user is not None:
                 user = pwd.getpwnam(user)
                 os.chown(tempname, user.pw_uid, user.pw_gid)
-                os.chmod(tempname, 0600)
+                os.chmod(tempname, 0o600)
             sock.listen(backlog)
             try:
                 os.rename(tempname, path)
@@ -61,8 +62,8 @@ def bind_unix_listener(path, backlog=50, user=None):
 
 
 def handle(socket, address):
-    print socket, address
-    print socket.recv(4096)
+    print(socket, address)
+    print(socket.recv(4096))
     socket.sendall('pong\n')
 
 
@@ -71,6 +72,6 @@ def serve(sock, handler=handle):
 
 if __name__ == "__main__":
     path = os.path.join(tempfile.gettempdir(), "echo.ipc")
-    print "Starting echo sever..."
-    print "Test it with:\n\techo 'ping'| socat - {}".format(path)
+    print("Starting echo sever...")
+    print("Test it with:\n\techo 'ping'| socat - {}".format(path))
     serve(bind_unix_listener(path))

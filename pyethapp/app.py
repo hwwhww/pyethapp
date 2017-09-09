@@ -1,4 +1,6 @@
 # -*- coding: utf8 -*-
+from __future__ import print_function
+from __future__ import absolute_import
 import copy
 import json
 import os
@@ -21,15 +23,15 @@ from ethereum.block import Block
 from ethereum.snapshot import create_snapshot, load_snapshot as _load_snapshot
 from gevent.event import Event
 
-import config as app_config
-import eth_protocol
-import utils
-from accounts import AccountsService, Account
-from console_service import Console
-from db_service import DBService
-from eth_service import ChainService
-from jsonrpc import JSONRPCServer, IPCRPCServer
-from pow_service import PoWService
+from . import config as app_config
+from . import eth_protocol
+from . import utils
+from .accounts import AccountsService, Account
+from .console_service import Console
+from .db_service import DBService
+from .eth_service import ChainService
+from .jsonrpc import JSONRPCServer, IPCRPCServer
+from .pow_service import PoWService
 from pyethapp import __version__
 from pyethapp.profiles import PROFILES, DEFAULT_PROFILE
 from pyethapp.utils import merge_dict, load_contrib_services, FallbackChoice, enable_greenlet_debugger
@@ -357,7 +359,7 @@ def snapshot(ctx, recent, filename):
     s = create_snapshot(app.services.chain.chain, recent)
     with open(filename, 'w') as f:
         json.dump(s, f, sort_keys=False, indent=4, separators=(',', ': '), encoding='ascii')
-        print 'snapshot saved to %s' % filename
+        print('snapshot saved to %s' % filename)
 
 
 @app.command('load_snapshot')
@@ -376,7 +378,7 @@ def load_snapshot(ctx, filename):
     with open(filename, 'r') as f:
         s = json.load(f, encoding='ascii')
         _load_snapshot(app.services.chain.chain, s)
-        print 'snapshot %s loaded.' % filename
+        print('snapshot %s loaded.' % filename)
 
 
 @app.command('export')

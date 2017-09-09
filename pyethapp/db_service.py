@@ -1,9 +1,10 @@
 # -*- coding: utf8 -*-
 
+from __future__ import absolute_import
 from devp2p.service import BaseService
 from ethereum.db import BaseDB
 from ethereum.slogging import get_logger
-from ephemdb_service import EphemDB
+from .ephemdb_service import EphemDB
 
 log = get_logger('db')
 
@@ -11,21 +12,21 @@ dbs = {}
 dbs['EphemDB'] = EphemDB
 
 try:
-    from leveldb_service import LevelDBService
+    from .leveldb_service import LevelDBService
 except ImportError:
     pass
 else:
     dbs['LevelDB'] = LevelDBService
 
 try:
-    from codernitydb_service import CodernityDB
+    from .codernitydb_service import CodernityDB
 except ImportError:
     pass
 else:
     dbs['CodernityDB'] = CodernityDB
 
 try:
-    from lmdb_service import LmDBService
+    from .lmdb_service import LmDBService
 except ImportError:
     pass
 else:

@@ -1,3 +1,4 @@
+from __future__ import print_function
 from pyethapp.eth_protocol import ETHProtocol, TransientBlockBody
 from devp2p.service import WiredService
 from devp2p.protocol import BaseProtocol
@@ -58,7 +59,7 @@ def test_status():
     assert _p == proto
     assert isinstance(_d, dict)
     assert _d['chain_difficulty'] == chain.chain.get_score(head)
-    print _d
+    print(_d)
     assert _d['chain_head_hash'] == head.hash
     assert _d['genesis_hash'] == genesis.hash
     assert 'eth_version' in _d

@@ -1,4 +1,5 @@
 # -*- coding: utf8 -*-
+from __future__ import absolute_import
 import copy
 import time
 import statistics
@@ -30,8 +31,8 @@ from ethereum.exceptions import InvalidTransaction, InvalidNonce, \
 from ethereum.transactions import Transaction
 from ethereum.utils import encode_hex
 
-from synchronizer import Synchronizer
-import eth_protocol
+from .synchronizer import Synchronizer
+from . import eth_protocol
 
 from pyethapp import sentry
 from pyethapp.dao import is_dao_challenge, build_dao_header
