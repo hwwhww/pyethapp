@@ -3,7 +3,12 @@ Essential parts borrowed from https://github.com/ipython/ipython/pull/1654
 """
 from __future__ import print_function
 from __future__ import absolute_import
-import cStringIO
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import range
+from builtins import object
+import io
 import errno
 import os
 import select
@@ -244,7 +249,7 @@ class Console(BaseService):
         self.console_locals = dict(eth=Eth(self.app), solidity=solc_wrapper, serpent=serpent,
                                    denoms=denoms, true=True, false=False, Eth=Eth)
 
-        for k, v in self.app.script_globals.items():
+        for k, v in list(self.app.script_globals.items()):
             self.console_locals[k] = v
 
     def _run(self):
@@ -286,7 +291,7 @@ class Console(BaseService):
             if isinstance(handler, StreamHandler) and handler.stream == sys.stderr:
                 root.removeHandler(handler)
 
-        stream = cStringIO.StringIO()
+        stream = io.StringIO()
         handler = StreamHandler(stream=stream)
         handler.formatter = Formatter("%(levelname)s:%(name)s %(message)s")
         root.addHandler(handler)
@@ -300,15 +305,15 @@ class Console(BaseService):
             """
             lines = (stream.getvalue().strip().split('\n') or [])
             if prefix:
-                lines = filter(lambda line: line.split(':')[1].startswith(prefix), lines)
+                lines = [line for line in lines if line.split(':')[1].startswith(prefix)]
             if level:
-                lines = filter(lambda line: line.split(':')[0] == level, lines)
+                lines = [line for line in lines if line.split(':')[0] == level]
             for line in lines[-n:]:
                 print(line)
 
         self.console_locals['lastlog'] = lastlog
 
-        err = cStringIO.StringIO()
+        err = io.StringIO()
         sys.stderr = err
 
         def lasterr(n=1):

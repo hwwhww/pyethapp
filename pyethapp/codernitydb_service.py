@@ -77,7 +77,7 @@ class CodernityDB(BaseDB, BaseService):
 
     def commit(self):
         log.debug('committing', db=self)
-        for k, v in self.uncommitted.items():
+        for k, v in list(self.uncommitted.items()):
             if v is None:
                 doc = self.db.get('key', k, with_doc=True)['doc']
                 self.db.delete(doc)

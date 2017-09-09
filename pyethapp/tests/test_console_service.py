@@ -1,3 +1,4 @@
+from builtins import str
 from itertools import count
 import pytest
 import serpent

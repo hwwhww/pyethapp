@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import input
 import signal
 import warnings
 from collections import Mapping
@@ -96,7 +97,7 @@ def load_block_tests(data, db):
     """
     scanners = ethereum.utils.scanners
     initial_alloc = {}
-    for address, acct_state in data['pre'].items():
+    for address, acct_state in list(data['pre'].items()):
         address = ethereum.utils.decode_hex(address)
         balance = scanners['int256b'](acct_state['balance'][2:])
         nonce = scanners['int256b'](acct_state['nonce'][2:])
@@ -117,7 +118,7 @@ def load_block_tests(data, db):
         parent = blocks[ethereum.utils.decode_hex(blk['blockHeader']['parentHash'])]
         block = rlp.decode(rlpdata, Block, parent=parent, env=env)
         blocks[block.hash] = block
-    return sorted(blocks.values(), key=lambda b: b.number)
+    return sorted(list(blocks.values()), key=lambda b: b.number)
 
 
 def merge_dict(dest, source):
@@ -157,7 +158,7 @@ class FallbackChoice(click.Choice):
 def enable_greenlet_debugger():
     def _print_exception(self, context, type_, value, traceback):
         ultratb.VerboseTB(call_pdb=True)(type_, value, traceback)
-        resp = raw_input(
+        resp = input(
             "{c.OKGREEN}Debugger exited. "
             "{c.OKBLUE}Do you want to quit pyethapp?{c.ENDC} [{c.BOLD}Y{c.ENDC}/n] ".format(
                 c=bcolors

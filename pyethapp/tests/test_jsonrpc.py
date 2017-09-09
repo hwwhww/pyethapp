@@ -1,4 +1,8 @@
 # -*- coding: utf8 -*-
+from builtins import hex
+from builtins import str
+from builtins import range
+from builtins import object
 import os
 from os import path
 from itertools import count

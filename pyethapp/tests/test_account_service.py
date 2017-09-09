@@ -1,3 +1,5 @@
+from builtins import str
+from builtins import range
 import os
 import shutil
 import tempfile
@@ -275,7 +277,7 @@ def test_account_sorting(app):
         s.add_account(Account(keystore_dummy, path=path), store=False)
 
     assert [account.path for account in s.accounts] == paths_sorted
-    assert [s.find(str(i)).path for i in xrange(1, len(paths) + 1)] == paths_sorted
+    assert [s.find(str(i)).path for i in range(1, len(paths) + 1)] == paths_sorted
 
 
 def test_update(app, account, password):
@@ -316,7 +318,7 @@ def test_update(app, account, password):
 
     assert os.listdir(app.config['accounts']['keystore_dir']) == ['update_test']
 
-    files = ['update_test~' + str(i) for i in xrange(20)]
+    files = ['update_test~' + str(i) for i in range(20)]
     files.append('update_test~')
     for filename in files:
         # touch files

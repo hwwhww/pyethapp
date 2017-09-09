@@ -1,4 +1,7 @@
 from __future__ import print_function
+from builtins import zip
+from builtins import str
+from builtins import range
 import os
 import sys
 import time
@@ -22,7 +25,7 @@ def generate_data_dirs(num_participants, prefix='v'):
         jsonrpc_port = 4000+i
         deposit_size = 500 + 500*i
 
-        bootstrap_nodes = range(num_participants)
+        bootstrap_nodes = list(range(num_participants))
         bootstrap_nodes.remove(i)
         bootstrap_nodes = ["enode://%s@0.0.0.0:%d" % (utils.encode_hex(privtopub(privkeys[n])), 40000+n) for n in bootstrap_nodes]
 

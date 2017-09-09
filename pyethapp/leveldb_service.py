@@ -97,7 +97,7 @@ class LevelDB(BaseDB):
     def commit(self):
         log.debug('committing', db=self)
         batch = leveldb.WriteBatch()
-        for k, v in self.uncommitted.items():
+        for k, v in list(self.uncommitted.items()):
             if v is None:
                 batch.Delete(k)
             else:

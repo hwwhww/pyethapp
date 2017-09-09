@@ -1,3 +1,6 @@
+from __future__ import division
+from builtins import str
+from past.utils import old_div
 import json
 from uuid import uuid4
 import ethereum.tools.keys
@@ -80,7 +83,7 @@ def test_unlock_wrong(keystore, password, privkey, uuid):
         account.unlock('4321' + password)
     assert account.locked
     with pytest.raises(ValueError):
-        account.unlock(password[:len(password) / 2])
+        account.unlock(password[:old_div(len(password), 2)])
     assert account.locked
     account.unlock(password)
     assert not account.locked

@@ -163,7 +163,7 @@ class ETHProtocol(BaseProtocol):
         ]
 
         def create(self, proto, hash_or_number, amount, skip=0, reverse=1):
-            if isinstance(hash_or_number, (int, long)):
+            if isinstance(hash_or_number, (int, int)):
                 block = int_to_big_endian(hash_or_number)
             else:
                 block = hash_or_number
