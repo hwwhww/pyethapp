@@ -1,7 +1,9 @@
+from __future__ import print_function
+from __future__ import absolute_import
 from gevent.event import AsyncResult
 import gevent
 import time
-from eth_protocol import TransientBlockBody, TransientBlock
+from .eth_protocol import TransientBlockBody, TransientBlock
 from ethereum.block import BlockHeader
 from ethereum.slogging import get_logger
 import ethereum.utils as utils

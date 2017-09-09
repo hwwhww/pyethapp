@@ -1,6 +1,7 @@
 gevent==1.1.0
 gipc==0.4.0
 leveldb
+CodernityDB
 lmdb
 requests
 click

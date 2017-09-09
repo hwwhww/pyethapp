@@ -1,6 +1,8 @@
 """
 Essential parts borrowed from https://github.com/ipython/ipython/pull/1654
 """
+from __future__ import print_function
+from __future__ import absolute_import
 import cStringIO
 import errno
 import os
@@ -222,7 +224,7 @@ class Console(BaseService):
                 return ABIContract(sender or this.coinbase, abi, address, this.call, this.transact)
 
             def block_from_rlp(this, rlp_data):
-                from eth_protocol import TransientBlock
+                from .eth_protocol import TransientBlock
                 import rlp
                 l = rlp.decode_lazy(rlp_data)
                 return TransientBlock.init_from_rlp(l).to_block()
@@ -261,8 +263,8 @@ class Console(BaseService):
         if hasattr(self.console_locals['eth'].app, 'apps'):
             print('\n' * 2 + bc.OKGREEN)
             print("Hint:" + bc.OKBLUE)
-            print('\tOther nodes are accessible from {}`eth.app.apps`{}').format(
-                bc.HEADER, bc.OKBLUE)
+            print(('\tOther nodes are accessible from {}`eth.app.apps`{}').format(
+                bc.HEADER, bc.OKBLUE))
             print('\tThey where automatically assigned to:')
             print("\t`{}eth1{}`".format(
                 bc.HEADER, bc.OKBLUE))

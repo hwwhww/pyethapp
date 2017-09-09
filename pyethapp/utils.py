@@ -1,3 +1,4 @@
+from __future__ import print_function
 import signal
 import warnings
 from collections import Mapping
@@ -33,7 +34,7 @@ def load_contrib_services(config):  # FIXME
     os.chdir(config_directory)
     for filename in os.listdir(contrib_directory):
         if filename.endswith('.py'):
-            print filename
+            print(filename)
             try:
                 __import__(filename[:-3])
                 library_conflict = True
@@ -46,11 +47,11 @@ def load_contrib_services(config):  # FIXME
             sys.path.pop()
     contrib_services = []
     for module in contrib_modules:
-        print 'm', module, dir(module)
+        print('m', module, dir(module))
         on_start, on_block = None, None
         for variable in dir(module):
             cls = getattr(module, variable)
-            if isinstance(cls, (type, types.ClassType)):
+            if isinstance(cls, type):
                 if issubclass(cls, BaseService) and cls != BaseService:
                     contrib_services.append(cls)
             if variable == 'on_block':

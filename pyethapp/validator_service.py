@@ -1,3 +1,4 @@
+from __future__ import print_function
 import time
 import random
 import gevent
@@ -37,9 +38,9 @@ class ValidatorService(BaseService):
         self.chain.time = lambda: int(time.time())
 
         self.key = self.config['validator']['privkey']
-        print "*"*100
-        print repr(self.key)
-        print len(self.key)
+        print("*"*100)
+        print(repr(self.key))
+        print(len(self.key))
         self.address = privtoaddr(self.key)
         self.validation_code = generate_validation_code(self.address)
         self.validation_code_hash = sha3(self.validation_code)

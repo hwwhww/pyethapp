@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import sys
 import time
@@ -63,11 +64,11 @@ def generate_data_dirs(num_participants, prefix='v'):
 
         with open(genesis_path, 'w') as f:
             json.dump(genesis, f, sort_keys=False, indent=4, separators=(',', ': '))
-        print "genesis for validator %d generated" % i
+        print("genesis for validator %d generated" % i)
 
         with open(config_path, 'w') as f:
             yaml.dump(config, f, default_flow_style=False, indent=4)
-        print "config for validator %d generated" % i
+        print("config for validator %d generated" % i)
 
 
 def generate_genesis(path=None, num_participants=1):
@@ -86,9 +87,9 @@ def generate_genesis(path=None, num_participants=1):
                                        to=casper_config['METROPOLIS_BLOCKHASH_STORE'],
                                        data=utils.encode_int32(0))
     genesis_number = call_casper(s, 'getBlockNumber')
-    print 'genesis block hash: %s' % utils.encode_hex(genesis_hash)
-    print 'genesis block number: %d' % genesis_number
-    print '%d validators: %r' % (num_participants, [utils.encode_hex(a) for a in addrs])
+    print('genesis block hash: %s' % utils.encode_hex(genesis_hash))
+    print('genesis block number: %d' % genesis_number)
+    print('%d validators: %r' % (num_participants, [utils.encode_hex(a) for a in addrs]))
 
     snapshot = s.to_snapshot()
     header = s.prev_headers[0]
@@ -107,15 +108,15 @@ def generate_genesis(path=None, num_participants=1):
     if path:
         with open(path, 'w') as f:
             json.dump(genesis, f, sort_keys=False, indent=4, separators=(',', ': '))
-        print 'casper genesis generated'
+        print('casper genesis generated')
     else:
         return genesis
 
 
 def usage():
-    print "usage:"
-    print "python pyethapp/tools.py genesis pyethapp/genesisdata/genesis_metropolis.json 3"
-    print "python pyethapp/tools.py datadir 3"
+    print("usage:")
+    print("python pyethapp/tools.py genesis pyethapp/genesisdata/genesis_metropolis.json 3")
+    print("python pyethapp/tools.py datadir 3")
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
@@ -127,6 +128,6 @@ if __name__ == "__main__":
     elif sys.argv[1] == "datadir":
         generate_data_dirs(int(sys.argv[2]))
     else:
-        print "unknown command: %s" % sys.argv[1]
+        print("unknown command: %s" % sys.argv[1])
         usage()
         sys.exit(1)
