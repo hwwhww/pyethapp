@@ -18,6 +18,7 @@ todo:
 """
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import str
 import os
 import copy
 import click
@@ -62,7 +63,7 @@ required_config = dict(node=dict(privkey_hex=''))
 
 def check_config(config, required_config=required_config):
     "check if values are set"
-    for k, v in required_config.items():
+    for k, v in list(required_config.items()):
         if not config.get(k):
             return False
         if isinstance(v, dict):

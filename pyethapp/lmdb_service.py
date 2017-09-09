@@ -83,13 +83,13 @@ class LmDBService(BaseDB, BaseService):
     def commit(self):
         keys_to_delete = (
             key
-            for key, value in self.uncommitted.items()
+            for key, value in list(self.uncommitted.items())
             if value is DELETE
         )
 
         items_to_insert = (
             (key, value)
-            for key, value in self.uncommitted.items()
+            for key, value in list(self.uncommitted.items())
             if value not in (DELETE, NULL)  # NULL shouldn't happen
         )
 

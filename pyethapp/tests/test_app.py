@@ -1,3 +1,4 @@
+from builtins import str
 import os
 import pytest
 from pyethapp import app
@@ -80,12 +81,12 @@ def test_custom_config_file(param):
         if arg.endswith('.json'):
             patterns = ['genesis: {}'.format(param[1])]
         else:
-            patterns = ["{}: '{}'".format(k, v) for k, v in genesis_json.items() if k != 'alloc']
+            patterns = ["{}: '{}'".format(k, v) for k, v in list(genesis_json.items()) if k != 'alloc']
 
         for pat in patterns:
             assert pat in result.output, '`{}` not found'.format(pat)
 
-        for k, v in genesis_json['alloc'].items():
+        for k, v in list(genesis_json['alloc'].items()):
             assert k in result.output
             assert v['balance'] in result.output
 

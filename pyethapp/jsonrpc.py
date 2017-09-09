@@ -1,5 +1,10 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import zip
+from builtins import str
+from builtins import map
+from builtins import range
+from builtins import object
 import os
 import inspect
 from copy import deepcopy
@@ -724,7 +729,7 @@ class Compilers(Subdispatcher):
 
     @public
     def getCompilers(self):
-        return self.compilers.keys()
+        return list(self.compilers.keys())
 
     @public
     def compileSolidity(self, code):
@@ -841,7 +846,7 @@ class Chain(Subdispatcher):
                 currentBlock=self.chain.chain.head.number,
                 highestBlock=synctask.end_block_number,
             )
-            return {k: quantity_encoder(v) for k, v in result.items()}
+            return {k: quantity_encoder(v) for k, v in list(result.items())}
 
     @public
     @encode_res(quantity_encoder)
@@ -1175,7 +1180,7 @@ class Chain(Subdispatcher):
         else:
             env = Env(db=block.db)
             test_block = mk_genesis_block(env)
-            original = {key: value for key, value in snapshot_before.items() if key != 'txs'}
+            original = {key: value for key, value in list(snapshot_before.items()) if key != 'txs'}
             original = deepcopy(original)
             original['txs'] = Trie(snapshot_before['txs'].db, snapshot_before['txs'].root_hash)
             test_block = mk_genesis_block(env)
@@ -1244,7 +1249,7 @@ class Chain(Subdispatcher):
         else:
             env = Env(db=block.db)
             test_block = mk_genesis_block(env)
-            original = {key: value for key, value in snapshot_before.items() if key != 'txs'}
+            original = {key: value for key, value in list(snapshot_before.items()) if key != 'txs'}
             original = deepcopy(original)
             original['txs'] = Trie(snapshot_before['txs'].db, snapshot_before['txs'].root_hash)
             test_block = mk_genesis_block(env)
@@ -1405,17 +1410,17 @@ class LogFilter(object):
                     # In case of the frequent usage of multiple 'or' statements in the filter
                     # the following logic should be optimized so that the fewer amount of blocks gets checked.
                     # It is currently optimal for filters with a single 'or' statement.
-                    _topic_and_bloom = bloom.bloom_from_list(map(int32.serialize, and_topics or []))
+                    _topic_and_bloom = bloom.bloom_from_list(list(map(int32.serialize, and_topics or [])))
                     bloom_passed = False
                     for or_t in or_topics:
-                        or_bl = bloom.bloom_from_list(map(int32.serialize, [or_t]))
+                        or_bl = bloom.bloom_from_list(list(map(int32.serialize, [or_t])))
                         if bloom.bloom_combine(_bloom, _topic_and_bloom, or_bl) == _bloom:
                             bloom_passed = True
                             break
                     if not bloom_passed:
                         continue
                 else:
-                    _topic_bloom = bloom.bloom_from_list(map(int32.serialize, self.topics or []))
+                    _topic_bloom = bloom.bloom_from_list(list(map(int32.serialize, self.topics or [])))
                     if bloom.bloom_combine(_bloom, _topic_bloom) != _bloom:
                         continue
                 block = self.chain.get_block(block)
@@ -1462,19 +1467,19 @@ class LogFilter(object):
             self.last_block_checked = blocks_to_check[-2] if len(blocks_to_check) >= 2 else None
         if self.last_block_checked and not isinstance(self.last_block_checked, Block):
             self.last_block_checked = self.chain.get_block(self.last_block_checked)
-        actually_new_ids = new_logs.viewkeys() - self.log_dict.viewkeys()
+        actually_new_ids = new_logs.keys() - self.log_dict.keys()
         self.log_dict.update(new_logs)
         return {id_: new_logs[id_] for id_ in actually_new_ids}
 
     @property
     def logs(self):
         self.check()
-        return self.log_dict.values()
+        return list(self.log_dict.values())
 
     @property
     def new_logs(self):
         d = self.check()
-        return d.values()
+        return list(d.values())
 
 
 class BlockFilter(object):
@@ -1728,9 +1733,9 @@ if __name__ == '__main__':
 
     def show_methods(dispatcher, prefix=''):
         # https://github.com/micheles/decorator/blob/3.4.1/documentation.rst
-        for name, method in dispatcher.method_map.items():
+        for name, method in list(dispatcher.method_map.items()):
             print(prefix + name, inspect.formatargspec(public_methods[name]))
-        for sub_prefix, subdispatcher_list in dispatcher.subdispatchers.items():
+        for sub_prefix, subdispatcher_list in list(dispatcher.subdispatchers.items()):
             for sub in subdispatcher_list:
                 show_methods(sub, prefix + sub_prefix)
 

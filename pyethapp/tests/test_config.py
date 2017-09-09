@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import str
 from devp2p.peermanager import PeerManager
 from devp2p.discovery import NodeDiscovery
 from devp2p.app import BaseApp

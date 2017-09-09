@@ -1,6 +1,11 @@
 # -*- coding: utf8 -*-
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import zip
+from builtins import next
+from builtins import bytes
+from builtins import str
+from builtins import range
 import copy
 import json
 import os
@@ -59,7 +64,7 @@ class EthApp(BaseApp):
 # Separators should be underscore!
 @click.group(help='Welcome to {} {}'.format(EthApp.client_name, EthApp.client_version))
 @click.option('--profile', type=FallbackChoice(
-                  PROFILES.keys(),
+                  list(PROFILES.keys()),
                   {'frontier': 'livenet', 'morden': 'testnet'},
                   "PyEthApp's configuration profiles have been renamed to "
                   "'livenet' and 'testnet'. The previous values 'frontier' and "
@@ -307,7 +312,7 @@ def blocktest(ctx, file, name):
         log.fatal('Name not found in file')
         ctx.abort()
     try:
-        blocks = utils.load_block_tests(data.values()[0], app.services.chain.chain.db)
+        blocks = utils.load_block_tests(list(data.values())[0], app.services.chain.chain.db)
     except ValueError:
         log.fatal('Invalid blocks encountered')
         ctx.abort()
@@ -418,7 +423,7 @@ def export_blocks(ctx, from_, to, file):
         sys.exit(1)
 
     log.info('Starting export')
-    for n in xrange(from_, to + 1):
+    for n in range(from_, to + 1):
         log.debug('Exporting block {}'.format(n))
         if (n - from_) % 50000 == 0:
             log.info('Exporting block {} to {}'.format(n, min(n + 50000, to)))

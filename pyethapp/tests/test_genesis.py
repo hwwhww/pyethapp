@@ -28,12 +28,12 @@ def test_genesis_config():
 
     genesis = mk_genesis_block(env)
     state = State(genesis.state_root, env)
-    for address, value_dict in alloc.items():
-        value = value_dict.values()[0]
+    for address, value_dict in list(alloc.items()):
+        value = list(value_dict.values())[0]
         assert state.get_balance(address) == value
 
 
-@pytest.mark.parametrize('profile', PROFILES.keys())
+@pytest.mark.parametrize('profile', list(PROFILES.keys()))
 def test_profile(profile):
     config = dict(eth=dict())
 

@@ -1,9 +1,12 @@
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 from ethereum import utils
 import random, rlp, sys
 try:
     from urllib.request import build_opener
 except:
-    from urllib2 import build_opener
+    from urllib.request import build_opener
 
 
 # Makes a request to a given URL (first arg) and optional params (second arg)

@@ -1,4 +1,5 @@
 from __future__ import print_function
+from builtins import object
 from pyethapp.eth_protocol import ETHProtocol, TransientBlockBody
 from devp2p.service import WiredService
 from devp2p.protocol import BaseProtocol

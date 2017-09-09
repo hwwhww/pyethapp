@@ -1,5 +1,10 @@
 # -*- coding: utf8 -*-
 from __future__ import absolute_import
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.utils import old_div
+from builtins import object
 import copy
 import time
 import statistics
@@ -373,7 +378,7 @@ class ChainService(WiredService):
         if gas_spent:
             self.processed_gas += gas_spent
             self.processed_elapsed += elapsed
-        return int(self.processed_gas / (0.001 + self.processed_elapsed))
+        return int(old_div(self.processed_gas, (0.001 + self.processed_elapsed)))
 
     def broadcast_newblock(self, block, chain_difficulty=None, origin=None):
         if not chain_difficulty:
@@ -536,7 +541,7 @@ class ChainService(WiredService):
 
             if hash_mode:  # hash traversal
                 if reverse:
-                    for i in xrange(skip+1):
+                    for i in range(skip+1):
                         try:
                             header = self.chain.get_block(origin_hash)
                             origin_hash = header.prevhash

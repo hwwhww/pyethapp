@@ -1,3 +1,5 @@
+from builtins import range
+from builtins import object
 import os
 import pytest
 from ethereum.db import EphemDB
@@ -21,10 +23,10 @@ class AppMock(object):
 
     class Services(dict):
 
-        class accounts:
+        class accounts(object):
             coinbase = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
 
-        class peermanager:
+        class peermanager(object):
 
             @classmethod
             def broadcast(*args, **kwargs):

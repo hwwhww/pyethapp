@@ -1,5 +1,7 @@
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import str
+from builtins import object
 from gevent.event import AsyncResult
 import gevent
 import time
@@ -346,8 +348,8 @@ class Synchronizer(object):
     def protocols(self):
         "return protocols which are not stopped sorted by highest chain_difficulty"
         # filter and cleanup
-        self._protocols = dict((p, cd) for p, cd in self._protocols.items() if not p.is_stopped)
-        return sorted(self._protocols.keys(), key=lambda p: self._protocols[p], reverse=True)
+        self._protocols = dict((p, cd) for p, cd in list(self._protocols.items()) if not p.is_stopped)
+        return sorted(list(self._protocols.keys()), key=lambda p: self._protocols[p], reverse=True)
 
     def receive_newblock(self, proto, t_block, chain_difficulty):
         "called if there's a newblock announced on the network"
