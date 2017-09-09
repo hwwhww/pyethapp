@@ -31,7 +31,7 @@ with codecs.open('HISTORY.rst', encoding='utf8') as history_file:
 LONG_DESCRIPTION = README + '\n\n' + HISTORY
 
 INSTALL_REQUIRES_REPLACEMENTS = {
-    'https://github.com/ethereum/ethash/tarball/master#egg=pyethash': 'pyethash',
+    'git+git://github.com/ethereum/ethash/tarball/master#egg=pyethash': 'pyethash',
 }
 
 INSTALL_REQUIRES = list()
@@ -50,7 +50,7 @@ DEPENDENCY_LINKS = []
 if os.environ.get("USE_PYETHEREUM_DEVELOP"):
     # Force installation of specific commits of devp2p and pyethereum.
     devp2p_ref='525e15a9967da3174ec9e4e367b5adfb76138bb4'
-    pyethereum_ref='8edc5954fb8b6697cb7c9d7d85ed71e5f6d74e0f'
+    pyethereum_ref='e141f28f641a4f1369b636953065181d7d4f6666'
     DEPENDENCY_LINKS = [
         'http://github.com/ethereum/pydevp2p/tarball/%s#egg=devp2p-9.99.9' % devp2p_ref,
         'http://github.com/ethereum/pyethereum/tarball/%s#egg=ethereum-9.99.9' % pyethereum_ref,
@@ -89,7 +89,7 @@ setup(
     install_requires=INSTALL_REQUIRES,
     dependency_links=DEPENDENCY_LINKS,
     tests_require=[
-        'ethereum-serpent>=1.8.1',
+        # 'ethereum-serpent>=1.8.1',
         'mock==2.0.0',
         'pytest-mock==1.6.0',
     ],
