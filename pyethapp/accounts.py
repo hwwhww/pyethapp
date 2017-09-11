@@ -10,10 +10,11 @@ from devp2p.service import BaseService
 from ethereum.tools import keys
 from ethereum.slogging import get_logger
 from ethereum.utils import privtopub  # this is different  than the one used in devp2p.crypto
-from ethereum.utils import sha3, is_string, decode_hex, remove_0x_head
+from ethereum.utils import sha3, is_string, encode_hex, remove_0x_head
+from rlp.utils import decode_hex
 log = get_logger('accounts')
 
-DEFAULT_COINBASE = 'de0b295669a9fd93d5f28d9ec85e40f4cb697bae'.decode('hex')
+DEFAULT_COINBASE = decode_hex('de0b295669a9fd93d5f28d9ec85e40f4cb697bae')
 
 random = SystemRandom()
 
@@ -25,7 +26,7 @@ def mk_privkey(seed):
 def mk_random_privkey():
     k = hex(random.getrandbits(256))[2:-1].zfill(64)
     assert len(k) == 64
-    return k.decode('hex')
+    return decode_hex(k)
 
 
 class Account(object):
@@ -41,7 +42,7 @@ class Account(object):
     def __init__(self, keystore, password=None, path=None):
         self.keystore = keystore
         try:
-            self._address = self.keystore['address'].decode('hex')
+            self._address = decode_hex(self.keystore['address'])
         except KeyError:
             self._address = None
         self.locked = True
@@ -97,7 +98,7 @@ class Account(object):
         d['crypto'] = self.keystore['crypto']
         d['version'] = self.keystore['version']
         if include_address and self.address is not None:
-            d['address'] = self.address.encode('hex')
+            d['address'] = encode_hex(self.address)
         if include_id and self.uuid is not None:
             d['id'] = self.uuid
         return json.dumps(d)
@@ -149,7 +150,7 @@ class Account(object):
         if self._address:
             pass
         elif 'address' in self.keystore:
-            self._address = self.keystore['address'].decode('hex')
+            self._address = decode_hex(self.keystore['address'])
         elif not self.locked:
             self._address = keys.privtoaddr(self.privkey)
         else:
@@ -190,7 +191,7 @@ class Account(object):
 
     def __repr__(self):
         if self.address is not None:
-            address = self.address.encode('hex')
+            address = encode_hex(self.address)
         else:
             address = '?'
         return '<Account(address={address}, id={id})>'.format(address=address, id=self.uuid)
@@ -444,7 +445,7 @@ class AccountsService(BaseService):
         if identifier[:2] == '0x':
             identifier = identifier[2:]
         try:
-            address = identifier.decode('hex')
+            address = decode_hex(identifier)
         except TypeError:
             success = False
         else:
@@ -483,16 +484,16 @@ class AccountsService(BaseService):
         assert len(address) == 20
         accounts = [account for account in self.accounts if account.address == address]
         if len(accounts) == 0:
-            raise KeyError('account with address {} not found'.format(address.encode('hex')))
+            raise KeyError('account with address {} not found'.format(encode_hex(address)))
         elif len(accounts) > 1:
-            log.warning('multiple accounts with same address found', address=address.encode('hex'))
+            log.warning('multiple accounts with same address found', address=encode_hex(address))
         return accounts[0]
 
     def sign_tx(self, address, tx):
         self.get_by_address(address).sign_tx(tx)
 
     def propose_path(self, address):
-        return os.path.join(self.keystore_dir, address.encode('hex'))
+        return os.path.join(self.keystore_dir, encode_hex(address))
 
     def __contains__(self, address):
         assert len(address) == 20

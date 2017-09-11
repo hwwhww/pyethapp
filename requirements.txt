@@ -1,5 +1,5 @@
-gevent==1.1.0
-gipc==0.4.0
+gevent
+gipc
 leveldb
 CodernityDB
 lmdb
@@ -8,7 +8,7 @@ click
 decorator
 pyyaml
 werkzeug
-ipython>=5.4.0,<6.0.0
+ipython
 statistics
 rlp==0.5.1
 devp2p>=0.8.0
