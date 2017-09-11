@@ -18,12 +18,12 @@ except ImportError:
 else:
     dbs['LevelDB'] = LevelDBService
 
-try:
-    from .codernitydb_service import CodernityDB
-except ImportError:
-    pass
-else:
-    dbs['CodernityDB'] = CodernityDB
+# try:
+#     from .codernitydb_service import CodernityDB
+# except ImportError:
+#     pass
+# else:
+#     dbs['CodernityDB'] = CodernityDB
 
 try:
     from .lmdb_service import LmDBService
