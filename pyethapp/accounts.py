@@ -65,6 +65,11 @@ class Account(object):
         """
         if key is None:
             key = mk_random_privkey()
+        if isinstance(key, str):
+            key = key.encode()
+        if isinstance(password, str):
+            password = password.encode()
+
         keystore = keys.make_keystore_json(key, password)
         keystore['id'] = uuid
         return Account(keystore, password, path)

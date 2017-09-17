@@ -26,6 +26,7 @@ from devp2p.service import BaseService
 from ethereum import config as eth_config
 from ethereum.block import Block
 from ethereum.snapshot import create_snapshot, load_snapshot as _load_snapshot
+from ethereum.utils import encode_hex
 from gevent.event import Event
 
 from . import config as app_config
@@ -39,7 +40,8 @@ from .jsonrpc import JSONRPCServer, IPCRPCServer
 from .pow_service import PoWService
 from pyethapp import __version__
 from pyethapp.profiles import PROFILES, DEFAULT_PROFILE
-from pyethapp.utils import merge_dict, load_contrib_services, FallbackChoice, enable_greenlet_debugger
+from pyethapp.utils import merge_dict, load_contrib_services, FallbackChoice, \
+                           enable_greenlet_debugger
 
 
 log = slogging.get_logger('app')
@@ -90,8 +92,8 @@ class EthApp(BaseApp):
               help='Unlock an account (prompts for password)')
 @click.option('--password', type=click.File(), help='path to a password file')
 @click.pass_context
-def app(ctx, profile, alt_config, config_values, alt_data_dir, log_config, bootstrap_node, log_json,
-        mining_pct, unlock, password, log_file):
+def app(ctx, profile, alt_config, config_values, alt_data_dir, log_config,
+        bootstrap_node, log_json, mining_pct, unlock, password, log_file):
     # configure logging
     slogging.configure(log_config, log_json=log_json, log_file=log_file)
 
@@ -152,7 +154,7 @@ def app(ctx, profile, alt_config, config_values, alt_data_dir, log_config, boots
 
     # Load genesis config
     app_config.update_config_from_genesis_json(config,
-                                           genesis_json_filename_or_dict=config['eth']['genesis'])
+                                               genesis_json_filename_or_dict=config['eth']['genesis'])
     if bootstrap_node:
         config['discovery']['bootstrap_nodes'] = [bytes(bootstrap_node)]
     if mining_pct > 0:
@@ -539,7 +541,7 @@ def new_account(ctx, uuid):
         password = click.prompt('Password to encrypt private key', default='', hide_input=True,
                                 confirmation_prompt=True, show_default=False)
     account = Account.new(password, uuid=id_)
-    account.path = os.path.join(app.services.accounts.keystore_dir, account.address.encode('hex'))
+    account.path = os.path.join(app.services.accounts.keystore_dir, encode_hex(account.address))
     try:
         app.services.accounts.add_account(account)
     except IOError:
@@ -548,7 +550,7 @@ def new_account(ctx, uuid):
         sys.exit(1)
     else:
         click.echo('Account creation successful')
-        click.echo('  Address: ' + account.address.encode('hex'))
+        click.echo('  Address: ' + encode_hex(account.address))
         click.echo('       Id: ' + str(account.uuid))
 
 
