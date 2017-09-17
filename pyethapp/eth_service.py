@@ -169,8 +169,7 @@ class ChainService(WiredService):
             env=env, genesis=genesis_data, coinbase=coinbase,
             new_head_cb=self._on_new_head)
         header = self.chain.state.prev_headers[0]
-
-        log.info('chain at', number=self.chain.head.number)
+        log.info('chain at', number=header.number)
         if 'genesis_hash' in sce:
             assert sce['genesis_hash'] == self.chain.genesis.hex_hash, \
                 "Genesis hash mismatch.\n  Expected: %s\n  Got: %s" % (
