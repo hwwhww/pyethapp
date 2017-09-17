@@ -22,15 +22,15 @@ from builtins import str
 import os
 import copy
 import click
-from devp2p.utils import update_config_with_defaults # updates only missing entries
+from devp2p.utils import update_config_with_defaults    # updates only missing entries
 import errno
 import yaml
 import ethereum.slogging as slogging
 from devp2p.service import BaseService
 from devp2p.app import BaseApp
 from .accounts import mk_random_privkey
-from ethereum.tools.keys import decode_hex
-from ethereum.utils import parse_int_or_hex, remove_0x_head
+from rlp.utils import decode_hex
+from ethereum.utils import parse_int_or_hex, remove_0x_head, encode_hex
 
 
 CONFIG_FILE_NAME = 'config.yaml'
@@ -42,6 +42,7 @@ default_data_dir = click.get_app_dir('pyethapp')
 
 def get_config_path(data_dir=default_data_dir):
     return os.path.join(data_dir, CONFIG_FILE_NAME)
+
 
 default_config_path = get_config_path(default_data_dir)
 
@@ -95,7 +96,7 @@ def setup_required_config(data_dir=default_data_dir):
     assert not os.path.exists(config_path)
     if not os.path.exists(data_dir):
         setup_data_dir(data_dir)
-    config = dict(node=dict(privkey_hex=mk_random_privkey().encode('hex')))
+    config = dict(node=dict(privkey_hex=encode_hex(mk_random_privkey())))
     write_config(config, config_path)
 
 
@@ -125,7 +126,7 @@ def write_config(config, path=default_config_path):
     """
     assert path
     log.info('writing config', path=path)
-    with open(path, 'wb') as f:
+    with open(path, 'w') as f:
         yaml.dump(config, f)
 
 
