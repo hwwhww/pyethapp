@@ -3,9 +3,11 @@ import sys
 from devp2p.service import BaseService
 from ethereum.db import BaseDB
 from gevent.event import Event
+from gevent.hub import getcurrent
 import leveldb
 from ethereum import slogging
 from ethereum.utils import encode_hex
+import random
 
 slogging.set_level('db', 'debug')
 log = slogging.get_logger('db')
@@ -176,6 +178,7 @@ class LevelDBService(LevelDB, BaseService):
         self.stop_event = Event()
         dbfile = os.path.join(self.app.config['data_dir'], 'leveldb')
         LevelDB.__init__(self, dbfile)
+        self.h = random.randrange(10**50)
 
     def _run(self):
         self.stop_event.wait()
@@ -184,3 +187,6 @@ class LevelDBService(LevelDB, BaseService):
         self.stop_event.set()
         # commit?
         log.debug('closing db')
+
+    def __hash__(self):
+        return self.h
