@@ -1,14 +1,14 @@
 gevent
 gipc
-leveldb
 CodernityDB
+leveldb
 lmdb
-requests
 click
 decorator
+wheel
 pyyaml
 werkzeug
-ipython
+ipython>=5.4.0,<6.0.0
 statistics
 requests
 rlp>=0.5.1,<0.6.0
