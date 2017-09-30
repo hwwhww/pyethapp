@@ -18,5 +18,5 @@ scrypt
 pexpect
 pyelliptic==1.5.7
 pycryptodome==3.4.6
-tinyrpc[gevent,httpclient,jsonext,websocket,wsgi]
 ethereum
+future
