@@ -2,7 +2,7 @@
 """Derived from https://groups.google.com/d/topic/gevent/5__B9hOup38/discussion
 """
 from __future__ import print_function
-import _socket
+import socket as _socket
 import os
 import pwd
 from gevent.server import StreamServer
