@@ -1,5 +1,5 @@
 gevent==1.1.0
-gipc==0.4.0
+gipc
 CodernityDB
 leveldb
 lmdb
@@ -12,7 +12,6 @@ ipython>=5.4.0,<6.0.0
 statistics
 requests
 rlp>=0.5.1,<0.6.0
-devp2p>=0.8.0
 pbkdf2
 scrypt
 pexpect
@@ -20,3 +19,6 @@ pyelliptic==1.5.7
 tinyrpc[gevent,httpclient,jsonext,websocket,wsgi]
 pycryptodome==3.4.6
 future
+https://github.com/ethereum/serpent/tarball/develop
+https://github.com/ethereum/pydevp2p/tarball/develop
+ethereum==2.0.5

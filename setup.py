@@ -30,35 +30,19 @@ with codecs.open('HISTORY.rst', encoding='utf8') as history_file:
 
 LONG_DESCRIPTION = README + '\n\n' + HISTORY
 
-INSTALL_REQUIRES_REPLACEMENTS = {
-    'git+git://github.com/ethereum/ethash/tarball/master#egg=pyethash': 'pyethash',
+# requirements
+install_requires = set(x.strip() for x in open('requirements.txt'))
+install_requires_replacements = {
+    'https://github.com/ethereum/serpent/tarball/develop': 'ethereum-serpent',
+    'https://github.com/ethereum/pydevp2p/tarball/develop': 'devp2p',
 }
+install_requires = [install_requires_replacements.get(r, r) for r in install_requires]
 
-INSTALL_REQUIRES = list()
-with open('requirements.txt') as requirements_file:
-    for requirement in requirements_file:
-        dependency = INSTALL_REQUIRES_REPLACEMENTS.get(
-            requirement.strip(),
-            requirement.strip(),
-        )
-
-        INSTALL_REQUIRES.append(dependency)
-
-INSTALL_REQUIRES = list(set(INSTALL_REQUIRES))
-
-DEPENDENCY_LINKS = []
-if os.environ.get("USE_PYETHEREUM_DEVELOP"):
-    # Force installation of specific commits of devp2p and pyethereum.
-    # devp2p_ref='525e15a9967da3174ec9e4e367b5adfb76138bb4'
-    # pyethereum_ref='e141f28f641a4f1369b636953065181d7d4f6666'
-    DEPENDENCY_LINKS = [
-        # 'http://github.com/ethereum/pydevp2p/tarball/%s#egg=devp2p-9.99.9' % devp2p_ref,
-        # 'http://github.com/ethereum/pyethereum/tarball/%s#egg=ethereum-9.99.9' % pyethereum_ref,
-        'https://github.com/ethereum/serpent/tarball/develop#egg=serpent-9.99.9',
-        'https://github.com/ethereum/pydevp2p/tarball/develop#egg=devp2p-9.99.9',
-        'https://github.com/ethereum/viper/tarball/master#egg=viper-9.99.9',
-        'https://github.com/ethereum/pyethereum/tarball/develop#egg=ethereum-9.99.9',
-    ]
+# dependency links
+dependency_links = [
+    'https://github.com/ethereum/serpent/tarball/develop#egg=ethereum-serpent-9.99.9',
+    'https://github.com/ethereum/pydevp2p/tarball/develop#egg=devp2p-9.99.9',
+]
 
 # *IMPORTANT*: Don't manually change the version here. Use the 'bump2version' utility.
 # see: https://github.com/ethereum/pyethapp/wiki/Development:-Versions-and-Releases
@@ -91,8 +75,8 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     cmdclass={'test': PyTest},
-    install_requires=INSTALL_REQUIRES,
-    dependency_links=DEPENDENCY_LINKS,
+    install_requires=install_requires,
+    dependency_links=dependency_links,
     tests_require=[
         # 'ethereum-serpent>=1.8.1',
         'mock==2.0.0',
