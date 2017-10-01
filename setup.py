@@ -56,6 +56,7 @@ if os.environ.get("USE_PYETHEREUM_DEVELOP"):
         # 'http://github.com/ethereum/pyethereum/tarball/%s#egg=ethereum-9.99.9' % pyethereum_ref,
         'https://github.com/ethereum/serpent/tarball/develop#egg=serpent-9.99.9',
         'https://github.com/ethereum/pydevp2p/tarball/develop#egg=devp2p-9.99.9',
+        'https://github.com/ethereum/viper/tarball/master#egg=viper-9.99.9',
         'https://github.com/ethereum/pyethereum/tarball/develop#egg=ethereum-9.99.9',
     ]
 
@@ -87,6 +88,7 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
     ],
     cmdclass={'test': PyTest},
     install_requires=INSTALL_REQUIRES,
