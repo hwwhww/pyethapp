@@ -21,3 +21,4 @@ tinyrpc[gevent,httpclient,jsonext,websocket,wsgi]
 pycryptodome==3.4.6
 ethereum
 future
+devp2p

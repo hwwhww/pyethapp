@@ -35,6 +35,7 @@ install_requires = set(x.strip() for x in open('requirements.txt'))
 install_requires_replacements = {
     'https://github.com/ethereum/serpent/tarball/develop': 'ethereum-serpent',
     'https://github.com/ethereum/pydevp2p/tarball/develop': 'devp2p',
+    'https://github.com/ethereum/pyethereum/tarball/develop': 'ethereum',
 }
 install_requires = [install_requires_replacements.get(r, r) for r in install_requires]
 
@@ -43,6 +44,11 @@ dependency_links = [
     'https://github.com/ethereum/serpent/tarball/develop#egg=ethereum-serpent-9.99.9',
     'https://github.com/ethereum/pydevp2p/tarball/develop#egg=devp2p-9.99.9',
 ]
+
+if os.environ.get("USE_PYETHEREUM_DEVELOP"):
+    # Force installation of specific commits of devp2p and pyethereum.
+    pyethereum_ref = '10607ab5bcbea935420c39f479dde24155e18ed1'
+    dependency_links.append('http://github.com/ethereum/pyethereum/tarball/%s#egg=ethereum-9.99.9' % pyethereum_ref)
 
 # *IMPORTANT*: Don't manually change the version here. Use the 'bump2version' utility.
 # see: https://github.com/ethereum/pyethapp/wiki/Development:-Versions-and-Releases
