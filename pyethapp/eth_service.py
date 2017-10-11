@@ -34,7 +34,10 @@ from ethereum.slogging import get_logger
 from ethereum.exceptions import InvalidTransaction, InvalidNonce, \
     InsufficientBalance, InsufficientStartGas, VerificationFailed
 from ethereum.transactions import Transaction
-from ethereum.utils import encode_hex
+from ethereum.utils import (
+    encode_hex,
+    to_string,
+)
 
 from .synchronizer import Synchronizer
 from . import eth_protocol
@@ -142,8 +145,8 @@ class ChainService(WiredService):
             self.db.put("I am not pruning", "1")
 
         if 'network_id' in self.db:
-            db_network_id = self.db.get('network_id')
-            if db_network_id != str(sce['network_id']):
+            db_network_id = self.db.get(b'network_id')
+            if db_network_id != to_string(sce['network_id']):
                 raise RuntimeError(
                     "The database in '{}' was initialized with network id {} and can not be used "
                     "when connecting to network id {}. Please choose a different data directory.".format(
@@ -152,7 +155,7 @@ class ChainService(WiredService):
                 )
 
         else:
-            self.db.put('network_id', str(sce['network_id']))
+            self.db.put(b'network_id', to_string(sce['network_id']))
             self.db.commit()
 
         assert self.db is not None
