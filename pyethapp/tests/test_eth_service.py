@@ -3,10 +3,14 @@ from builtins import object
 import os
 import pytest
 from ethereum.db import EphemDB
+from ethereum.utils import (
+    decode_hex,
+    encode_hex,
+)
 from pyethapp.config import update_config_with_defaults
 from pyethapp import eth_service
 from pyethapp import leveldb_service
-from pyethapp import codernitydb_service
+# from pyethapp import codernitydb_service
 from pyethapp import eth_protocol
 from ethereum import slogging
 from ethereum.tools import tester
@@ -96,7 +100,7 @@ def test_receive_newblock():
     app = AppMock()
     eth = eth_service.ChainService(app)
     proto = eth_protocol.ETHProtocol(PeerMock(app), eth)
-    d = eth_protocol.ETHProtocol.newblock.decode_payload(newblk_rlp.decode('hex'))
+    d = eth_protocol.ETHProtocol.newblock.decode_payload(decode_hex(newblk_rlp))
     eth.on_receive_newblock(proto, **d)
 
 
@@ -105,9 +109,9 @@ def receive_blockheaders(rlp_data, leveldb=False, codernitydb=False):
     if leveldb:
         app.db = leveldb_service.LevelDB(
             os.path.join(app.config['app']['dir'], app.config['db']['path']))
-    if codernitydb:
-        app.db = codernitydb_service.CodernityDB(
-            os.path.join(app.config['app']['dir'], app.config['db']['path']))
+    # if codernitydb:
+    #     app.db = codernitydb_service.CodernityDB(
+    #         os.path.join(app.config['app']['dir'], app.config['db']['path']))
 
     eth = eth_service.ChainService(app)
     proto = eth_protocol.ETHProtocol(PeerMock(app), eth)
@@ -116,16 +120,16 @@ def receive_blockheaders(rlp_data, leveldb=False, codernitydb=False):
 
 
 def test_receive_block1():
-    rlp_data = rlp.encode([rlp.decode(block_1.decode('hex'))])
+    rlp_data = rlp.encode([rlp.decode(decode_hex(block_1))])
     receive_blockheaders(rlp_data)
 
 
 def test_receive_blockheaders_256():
-    receive_blockheaders(data256.decode('hex'))
+    receive_blockheaders(decode_hex(data256))
 
 
 def test_receive_blockheaders_256_leveldb():
-    receive_blockheaders(data256.decode('hex'), leveldb=True)
+    receive_blockheaders(decode_hex(data256), leveldb=True)
 
 
 @pytest.fixture
@@ -140,11 +144,11 @@ def test_app(tmpdir):
                 'BLOCK_DIFF_FACTOR': 2,  # greater than difficulty, thus difficulty is constant
                 'GENESIS_GAS_LIMIT': 3141592,
                 'GENESIS_INITIAL_ALLOC': {
-                    tester.accounts[0].encode('hex'): {'balance': 10 ** 24},
-                    tester.accounts[1].encode('hex'): {'balance': 10 ** 24},
-                    tester.accounts[2].encode('hex'): {'balance': 10 ** 24},
-                    tester.accounts[3].encode('hex'): {'balance': 10 ** 24},
-                    tester.accounts[4].encode('hex'): {'balance': 10 ** 24},
+                    encode_hex(tester.accounts[0]): {'balance': 10 ** 24},
+                    encode_hex(tester.accounts[1]): {'balance': 10 ** 24},
+                    encode_hex(tester.accounts[2]): {'balance': 10 ** 24},
+                    encode_hex(tester.accounts[3]): {'balance': 10 ** 24},
+                    encode_hex(tester.accounts[4]): {'balance': 10 ** 24},
                 }
             }
         }

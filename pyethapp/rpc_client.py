@@ -11,7 +11,14 @@ import gevent
 from ethereum.abi import ContractTranslator
 from ethereum.tools.keys import privtoaddr
 from ethereum.transactions import Transaction
-from ethereum.utils import denoms, int_to_big_endian, big_endian_to_int, normalize_address
+from ethereum.utils import (
+    denoms,
+    int_to_big_endian,
+    big_endian_to_int,
+    normalize_address,
+    decode_hex,
+    encode_hex,
+)
 from ethereum.tools._solidity import solidity_unresolved_symbols, solidity_library_symbol, solidity_resolve_symbols
 from tinyrpc.protocols.jsonrpc import JSONRPCErrorResponse, JSONRPCSuccessResponse
 from tinyrpc.protocols.jsonrpc import JSONRPCProtocol
@@ -26,7 +33,7 @@ from pyethapp.jsonrpc import (
 # pylint: disable=invalid-name,too-many-arguments,too-few-public-methods
 # The number of arguments an it's names are determined by the JSON-RPC spec
 
-z_address = '\x00' * 20
+z_address = b'\x00' * 20
 log = logging.getLogger(__name__)
 
 
@@ -165,7 +172,7 @@ class JSONRPCClient(object):
 
     def nonce(self, address):
         if len(address) == 40:
-            address = address.decode('hex')
+            address = decode_hex(address)
 
         try:
             res = self.call('eth_nonce', address_encoder(address), 'pending')
@@ -244,7 +251,7 @@ class JSONRPCClient(object):
                 dependency_contract = all_contracts[deploy_contract]
 
                 hex_bytecode = solidity_resolve_symbols(dependency_contract['bin_hex'], libraries)
-                bytecode = hex_bytecode.decode('hex')
+                bytecode = decode_hex(hex_bytecode)
 
                 dependency_contract['bin_hex'] = hex_bytecode
                 dependency_contract['bin'] = bytecode
@@ -255,7 +262,7 @@ class JSONRPCClient(object):
                     data=bytecode,
                     gasprice=gasprice,
                 )
-                transaction_hash = transaction_hash_hex.decode('hex')
+                transaction_hash = decode_hex(transaction_hash_hex)
 
                 self.poll(transaction_hash, timeout=timeout)
                 receipt = self.eth_getTransactionReceipt(transaction_hash)
@@ -265,13 +272,13 @@ class JSONRPCClient(object):
 
                 libraries[deploy_contract] = contract_address
 
-                deployed_code = self.eth_getCode(contract_address.decode('hex'))
+                deployed_code = self.eth_getCode(decode_hex(contract_address))
 
                 if deployed_code == '0x':
                     raise RuntimeError("Contract address has no code, check gas usage.")
 
             hex_bytecode = solidity_resolve_symbols(contract['bin_hex'], libraries)
-            bytecode = hex_bytecode.decode('hex')
+            bytecode = decode_hex(hex_bytecode)
 
             contract['bin_hex'] = hex_bytecode
             contract['bin'] = bytecode
@@ -289,13 +296,13 @@ class JSONRPCClient(object):
             data=bytecode,
             gasprice=gasprice,
         )
-        transaction_hash = transaction_hash_hex.decode('hex')
+        transaction_hash = decode_hex(transaction_hash_hex)
 
         self.poll(transaction_hash, timeout=timeout)
         receipt = self.eth_getTransactionReceipt(transaction_hash)
         contract_address = receipt['contractAddress']
 
-        deployed_code = self.eth_getCode(contract_address[2:].decode('hex'))
+        deployed_code = self.eth_getCode(decode_hex(contract_address[2:]))
 
         if deployed_code == '0x':
             raise RuntimeError("Deployment of {} failed. Contract address has no code, check gas usage.".format(
@@ -433,7 +440,7 @@ class JSONRPCClient(object):
 
         res = self.eth_sendTransaction(**tx_dict)
         assert len(res) in (20, 32)
-        return res.encode('hex')
+        return encode_hex(res)
 
     def eth_sendTransaction(self, nonce=None, sender='', to='', value=0, data='',
                             gasPrice=default_gasprice, gas=default_startgas,

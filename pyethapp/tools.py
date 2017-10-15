@@ -14,7 +14,7 @@ from ethereum.casper_utils import RandaoManager, generate_validation_code, make_
 from devp2p.crypto import privtopub
 
 def generate_data_dirs(num_participants, prefix='v'):
-    privkeys = [utils.sha3(str(i)) for i in range(num_participants)]
+    privkeys = [utils.sha3(utils.to_string(i)) for i in range(num_participants)]
     addrs = [utils.privtoaddr(k) for k in privkeys]
     genesis = generate_genesis(None, num_participants)
 
@@ -29,7 +29,7 @@ def generate_data_dirs(num_participants, prefix='v'):
         bootstrap_nodes.remove(i)
         bootstrap_nodes = ["enode://%s@0.0.0.0:%d" % (utils.encode_hex(privtopub(privkeys[n])), 40000+n) for n in bootstrap_nodes]
 
-        dir = prefix + str(i)
+        dir = prefix + utils.to_string(i)
         try:
             os.stat(dir)
         except:
@@ -75,7 +75,7 @@ def generate_data_dirs(num_participants, prefix='v'):
 
 
 def generate_genesis(path=None, num_participants=1):
-    privkeys = [utils.sha3(str(i)) for i in range(num_participants)]
+    privkeys = [utils.sha3(utils.to_string(i)) for i in range(num_participants)]
     addrs = [utils.privtoaddr(k) for k in privkeys]
     deposit_sizes = [i * 500 + 500 for i in range(num_participants)]
     randaos = [RandaoManager(utils.sha3(k)) for k in privkeys]

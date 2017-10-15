@@ -354,7 +354,9 @@ class Subdispatcher(object):
 
 def quantity_decoder(data):
     """Decode `data` representing a quantity."""
-    if not is_string(data):
+    # [NOTE] check it! 
+    # if not is_string(data):
+    if not isinstance(data, str):
         success = False
     elif not data.startswith('0x'):
         success = False  # must start with 0x prefix
@@ -399,7 +401,7 @@ def data_decoder(data):
 def data_encoder(data, length=None):
     """Encode unformatted binary `data`.
 
-    If `length` is given, the result will be padded like this: ``data_encoder('\xff', 3) ==
+    If `length` is given, the result will be padded like this: ``data_encoder('b\xff', 3) ==
     '0x0000ff'``.
     """
     s = encode_hex(data)
@@ -419,8 +421,8 @@ def address_decoder(data):
 
 def address_encoder(address):
     assert len(address) in (20, 0)
-    return '0x' + encode_hex(address)
-
+    result =  '0x' + encode_hex(address)
+    return result
 
 def block_id_decoder(data):
     """Decode a block identifier as expected from :meth:`JSONRPCServer.get_block`."""
@@ -649,11 +651,11 @@ class Personal(Subdispatcher):
     @encode_res(address_encoder)
     def newAccount(self, passwd):
         account = Account.new(passwd)
-        account.path = os.path.join(self.app.services.accounts.keystore_dir, account.address.encode('hex'))
+        account.path = os.path.join(self.app.services.accounts.keystore_dir, encode_hex(account.address))
         self.app.services.accounts.add_account(account)
         account.lock()
         assert account.locked
-        assert self.app.services.accounts.find(account.address.encode('hex'))
+        assert self.app.services.accounts.find(encode_hex(account.address))
         return account.address
 
 
@@ -1209,7 +1211,7 @@ class Chain(Subdispatcher):
         try:
             sender = address_decoder(data['from'])
         except KeyError:
-            sender = '\x00' * 20
+            sender = b'\x00' * 20
 
         # apply transaction
         nonce = test_block.get_nonce(sender)
@@ -1278,7 +1280,7 @@ class Chain(Subdispatcher):
         try:
             sender = address_decoder(data['from'])
         except KeyError:
-            sender = '\x00' * 20
+            sender = b'\x00' * 20
 
         # apply transaction
         nonce = test_block.get_nonce(sender)
@@ -1453,11 +1455,11 @@ class LogFilter(object):
                         continue
                     # still here, so match was successful => add to log list
                     tx = block.transactions[r_idx]
-                    id_ = sha3(''.join((tx.hash, str(l_idx))))
+                    id_ = sha3(''.join((encode_hex(tx.hash), str(l_idx))))
                     pending = block == self.chainservice.head_candidate
                     r = dict(log=log, log_idx=l_idx, block=block, txhash=tx.hash, tx_idx=r_idx,
                              pending=pending)
-                    logger.debug('FOUND LOG', id=id_.encode('hex'))
+                    logger.debug('FOUND LOG', id=encode_hex(id_))
                     new_logs[id_] = r  # (log, i, block)
         # don't check blocks again, that have been checked already and won't change anymore
         self.last_block_checked = blocks_to_check[-1]
@@ -1677,7 +1679,7 @@ class FilterManager(Subdispatcher):
         blk = self.app.services.chain.chain.get(blockhash)
         for i in range(blk.transaction_count):
             tx_lst_serialized, sr, _ = blk.get_transaction(i)
-            txhash_hex = sha3(rlp.encode(tx_lst_serialized)).encode('hex')
+            txhash_hex = encode_hex(sha3(rlp.encode(tx_lst_serialized)))
             txs.append(self.trace_transaction(txhash_hex, exclude))
         return txs
 

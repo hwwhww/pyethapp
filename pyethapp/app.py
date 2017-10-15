@@ -26,7 +26,11 @@ from devp2p.service import BaseService
 from ethereum import config as eth_config
 from ethereum.block import Block
 from ethereum.snapshot import create_snapshot, load_snapshot as _load_snapshot
-from ethereum.utils import encode_hex
+from ethereum.utils import (
+    encode_hex,
+    decode_hex,
+    to_string,
+)
 from gevent.event import Event
 
 from . import config as app_config
@@ -156,7 +160,8 @@ def app(ctx, profile, alt_config, config_values, alt_data_dir, log_config,
     app_config.update_config_from_genesis_json(config,
                                                genesis_json_filename_or_dict=config['eth']['genesis'])
     if bootstrap_node:
-        config['discovery']['bootstrap_nodes'] = [bytes(bootstrap_node)]
+        # [NOTE]: check it
+        config['discovery']['bootstrap_nodes'] = [to_string(bootstrap_node)]
     if mining_pct > 0:
         config['pow']['activated'] = True
         config['pow']['cpu_pct'] = int(min(100, mining_pct))
@@ -533,7 +538,7 @@ def new_account(ctx, uuid):
     """
     app = ctx.obj['app']
     if uuid:
-        id_ = str(uuid4())
+        id_ = to_string(uuid4())
     else:
         id_ = None
     password = ctx.obj['password']
@@ -551,7 +556,7 @@ def new_account(ctx, uuid):
     else:
         click.echo('Account creation successful')
         click.echo('  Address: ' + encode_hex(account.address))
-        click.echo('       Id: ' + str(account.uuid))
+        click.echo('       Id: ' + account.uuid.hex)
 
 
 @account.command('list')
@@ -573,8 +578,8 @@ def list_accounts(ctx):
                                                                  id='Id (if any)',
                                                                  locked='Locked'))
         for i, account in enumerate(accounts):
-            click.echo(fmt.format(i='#' + str(i + 1),
-                                  address=(account.address or '').encode('hex'),
+            click.echo(fmt.format(i='#' + to_string(i + 1),
+                                  address=encode_hex(account.address or ''),
                                   id=account.uuid or '',
                                   locked='yes' if account.locked else 'no'))
 
@@ -595,12 +600,12 @@ def import_account(ctx, f, uuid):
     """
     app = ctx.obj['app']
     if uuid:
-        id_ = str(uuid4())
+        id_ = to_string(uuid4())
     else:
         id_ = None
     privkey_hex = f.read()
     try:
-        privkey = privkey_hex.strip().decode('hex')
+        privkey = decode_hex(privkey_hex.strip())
     except TypeError:
         click.echo('Could not decode private key from file (should be hex encoded)')
         sys.exit(1)
@@ -608,8 +613,13 @@ def import_account(ctx, f, uuid):
     if password is None:
         password = click.prompt('Password to encrypt private key', default='', hide_input=True,
                                 confirmation_prompt=True, show_default=False)
+        # [NOTE]: check it
+        password = password.encode("latin-1")
+    log.info('type(password): {}'.format(type(password)))
+    log.info('type(privkey): {}'.format(type(privkey)))
+
     account = Account.new(password, privkey, uuid=id_)
-    account.path = os.path.join(app.services.accounts.keystore_dir, account.address.encode('hex'))
+    account.path = os.path.join(app.services.accounts.keystore_dir, encode_hex(account.address))
     try:
         app.services.accounts.add_account(account)
     except IOError:
@@ -618,8 +628,8 @@ def import_account(ctx, f, uuid):
         sys.exit(1)
     else:
         click.echo('Account creation successful')
-        click.echo('  Address: ' + account.address.encode('hex'))
-        click.echo('       Id: ' + str(account.uuid))
+        click.echo('  Address: ' + encode_hex(account.address))
+        click.echo('       Id: ' + account.uuid.hex)
 
 
 @account.command('update')
@@ -657,7 +667,7 @@ def update_account(ctx, account):
         sys.exit(1)
 
     click.echo('Updating account')
-    click.echo('Address: {}'.format(old_account.address.encode('hex')))
+    click.echo('Address: {}'.format(encode_hex(old_account.address)))
     click.echo('     Id: {}'.format(old_account.uuid))
 
     new_password = click.prompt('New password', default='', hide_input=True,
@@ -708,7 +718,7 @@ def unlock_accounts(account_ids, account_service, max_attempts=3, password=None)
                 sys.exit(1)
         return
 
-    max_attempts_str = str(max_attempts) if max_attempts else 'oo'
+    max_attempts_str = to_string(max_attempts) if max_attempts else 'oo'
     attempt_fmt = '(attempt {{attempt}}/{})'.format(max_attempts_str)
     first_attempt_fmt = 'Password for account {id} ' + attempt_fmt
     further_attempts_fmt = 'Wrong password. Please try again ' + attempt_fmt

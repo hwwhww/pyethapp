@@ -454,7 +454,7 @@ class ChainService(WiredService):
 
         # check genesis
         if genesis_hash != self.chain.genesis.hash:
-            log.warn("invalid genesis hash", remote_id=proto, genesis=genesis_hash.encode('hex'))
+            log.warn("invalid genesis hash", remote_id=proto, genesis=encode_hex(genesis_hash))
             raise eth_protocol.ETHProtocolError('wrong genesis block')
 
         # initiate DAO challenge

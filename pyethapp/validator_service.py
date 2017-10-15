@@ -141,7 +141,7 @@ class ValidatorService(BaseService):
         if self.active:
             self.next_skip_count = 0
             self.next_skip_timestamp = get_timestamp(self.chain, self.next_skip_count)
-        log.debug('Head changed: %s, will attempt creating a block at %d' % (self.chain.head_hash.encode('hex'), self.next_skip_timestamp))
+        log.debug('Head changed: %s, will attempt creating a block at %d' % (encode_hex(self.chain.head_hash), self.next_skip_timestamp))
 
     def withdraw(self, gasprice=20 * 10**9):
         sigdata = make_withdrawal_signature(self.key)

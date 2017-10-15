@@ -6,10 +6,15 @@ import tempfile
 from uuid import uuid4
 import ethereum.tools.keys
 from ethereum.slogging import get_logger
-from ethereum.utils import decode_hex, remove_0x_head
+from ethereum.utils import (
+    encode_hex,
+    decode_hex,
+    remove_0x_head,
+)
 from devp2p.app import BaseApp
 import pytest
 from pyethapp.accounts import Account, AccountsService, DEFAULT_COINBASE
+from pyethapp.utils import MinType
 
 
 # reduce key derivation iterations
@@ -138,10 +143,10 @@ def test_find(app, account):
     s.add_account(account, store=False)
     assert len(s) == 1
     assert s.find('1') == account
-    assert s.find(account.address.encode('hex')) == account
-    assert s.find(account.address.encode('hex').upper()) == account
-    assert s.find('0x' + account.address.encode('hex')) == account
-    assert s.find('0x' + account.address.encode('hex').upper()) == account
+    assert s.find(encode_hex(account.address)) == account
+    assert s.find(encode_hex(account.address).upper()) == account
+    assert s.find('0x' + encode_hex(account.address)) == account
+    assert s.find('0x' + encode_hex(account.address).upper()) == account
     assert s.find(account.uuid) == account
     assert s.find(account.uuid.upper()) == account
     with pytest.raises(ValueError):
@@ -270,14 +275,17 @@ def test_account_sorting(app):
         '/absolute/path/a',
         None
     ]
-    paths_sorted = sorted(paths)
 
+    # paths_sortable = [(x or "") for x in paths]
+    min_value = MinType()
+    paths_sorted = sorted(paths, key=lambda x: min_value if x is None else x)
+    # paths_sorted = sorted(paths, key=lambda x: (x is None, x))
     s = app.services.accounts
     for path in paths:
         s.add_account(Account(keystore_dummy, path=path), store=False)
 
     assert [account.path for account in s.accounts] == paths_sorted
-    assert [s.find(str(i)).path for i in range(1, len(paths) + 1)] == paths_sorted
+    # assert [s.find(str(i)).path for i in range(1, len(paths) + 1)] == paths_sorted
 
 
 def test_update(app, account, password):
@@ -341,13 +349,13 @@ def test_coinbase(app, account):
     assert s.coinbase == account.address
 
     # coinbase configured
-    app.config['pow'] = {'coinbase_hex': account.address.encode('hex')}
+    app.config['pow'] = {'coinbase_hex': encode_hex(account.address)}
     app.config['accounts']['must_include_coinbase'] = True
     assert s.coinbase == account.address
     app.config['accounts']['must_include_coinbase'] = False
     assert s.coinbase == account.address
 
-    for invalid_coinbase in [123, '\x00' * 20, '\x00' * 40, '', 'aabbcc', 'aa' * 19, 'ff' * 21]:
+    for invalid_coinbase in [123, b'\x00' * 20, b'\x00' * 40, b'', b'aabbcc', b'aa' * 19, b'ff' * 21]:
         app.config['pow'] = {'coinbase_hex': invalid_coinbase}
         app.config['accounts']['must_include_coinbase'] = False
         with pytest.raises(ValueError):
@@ -381,7 +389,12 @@ def test_get_by_address_no_match(app, account):
         s.get_by_address(account.address)
         assert False, "An exception should have been raised on no account match"
     except KeyError as e:
-        assert e.message == "account with address 41ad2bc63a2059f9b623533d87fe99887d794847 not found"
+        if hasattr(e, 'message'):
+            # py2
+            assert e.message == "account with address 41ad2bc63a2059f9b623533d87fe99887d794847 not found"
+        else:
+            # py3
+            assert "account with address 41ad2bc63a2059f9b623533d87fe99887d794847 not found" in str(e)
 
 def test_get_by_address_multiple_match(app, account, patched_logger_warning):
     """
@@ -393,4 +406,4 @@ def test_get_by_address_multiple_match(app, account, patched_logger_warning):
     s.add_account(account, store=False)
     s.get_by_address(account.address)
     patched_logger_warning.assert_called_once_with(
-        "multiple accounts with same address found", address=account.address.encode('hex'))
+        "multiple accounts with same address found", address=encode_hex(account.address))

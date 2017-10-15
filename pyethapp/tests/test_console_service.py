@@ -10,6 +10,7 @@ import ethereum.tools.keys
 import ethereum.config
 from ethereum.slogging import get_logger, configure_logging
 from ethereum.state import State
+from ethereum.utils import encode_hex
 from pyethapp.accounts import Account, AccountsService, mk_random_privkey
 from pyethapp.app import EthApp
 from pyethapp.config import update_config_with_defaults, get_default_config
@@ -83,7 +84,7 @@ def test_app(request, tmpdir):
             'max_peers': 0,
             'listen_port': 29873
         },
-        'node': {'privkey_hex': mk_random_privkey().encode('hex')},
+        'node': {'privkey_hex': encode_hex(mk_random_privkey())},
         'discovery': {
             'boostrap_nodes': [],
             'listen_port': 29873
@@ -94,9 +95,9 @@ def test_app(request, tmpdir):
                 'BLOCK_DIFF_FACTOR': 2,  # greater than difficulty, thus difficulty is constant
                 'GENESIS_GAS_LIMIT': 3141592,
                 'GENESIS_INITIAL_ALLOC': {
-                    tester.accounts[0].encode('hex'): {'balance': 10**24},
-                    tester.accounts[1].encode('hex'): {'balance': 1},
-                    tester.accounts[2].encode('hex'): {'balance': 10**24},
+                    encode_hex(tester.accounts[0]): {'balance': 10**24},
+                    encode_hex(tester.accounts[1]): {'balance': 1},
+                    encode_hex(tester.accounts[2]): {'balance': 10**24},
                 }
             }
         },
@@ -136,14 +137,14 @@ def main(a,b):
     tx = eth.transact(to='', data=evm_code, startgas=500000, sender=sender)
 
     hc_state_dict = State(chainservice.head_candidate.state_root, chain.env).to_dict()
-    code = hc_state_dict[tx.creates.encode('hex')]['code']
+    code = hc_state_dict[encode_hex(tx.creates)]['code']
     assert len(code) > 2
     assert code != '0x'
 
     test_app.mine_next_block()
 
     creates = chain.head.transactions[0].creates
-    code = chain.state.to_dict()[creates.encode('hex')]['code']
+    code = chain.state.to_dict()[encode_hex(creates)]['code']
     assert len(code) > 2
     assert code != '0x'
 
@@ -188,7 +189,7 @@ def test_console_name_reg_contract(test_app):
         tx = eth.transact(to='', data=evm_code, startgas=500000, sender=sender)
 
         hc_state_dict = State(chainservice.head_candidate.state_root, chain.env).to_dict()
-        code = hc_state_dict[tx.creates.encode('hex')]['code']
+        code = hc_state_dict[encode_hex(tx.creates)]['code']
         assert len(code) > 2
         assert code != '0x'
 
@@ -196,7 +197,7 @@ def test_console_name_reg_contract(test_app):
 
         creates = chain.head.transactions[0].creates
         state_dict = chain.state.to_dict()
-        code = state_dict[creates.encode('hex')]['code']
+        code = state_dict[encode_hex(creates)]['code']
         assert len(code) > 2
         assert code != '0x'
 
@@ -209,4 +210,4 @@ def test_console_name_reg_contract(test_app):
         test_app.mine_next_block()
 
         result = namereg.resolve(sender)
-        assert result == 'alice' + ('\x00' * 27)
+        assert result == b'alice' + ('\x00' * 27).encode()

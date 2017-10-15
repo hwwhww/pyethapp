@@ -6,9 +6,9 @@ from builtins import object
 import os
 from os import path
 from itertools import count
+import json
 import gevent
 import gc
-import json
 
 import pytest
 import rlp
@@ -20,7 +20,14 @@ from ethereum.pow.ethpow import mine
 from ethereum.tools import tester
 from ethereum.slogging import get_logger, configure_logging
 from ethereum.state import State
+from ethereum.utils import (
+    decode_hex,
+    encode_hex,
+)
+from ethereum.tools import _solidity
+from ethereum.abi import event_id, normalize_name
 from devp2p.peermanager import PeerManager
+from tinyrpc.protocols.jsonrpc import JSONRPCProtocol
 
 from pyethapp.accounts import Account, AccountsService, mk_random_privkey
 from pyethapp.app import EthApp
@@ -30,12 +37,10 @@ from pyethapp.eth_service import ChainService
 from pyethapp.jsonrpc import Compilers, JSONRPCServer, quantity_encoder, address_encoder, data_decoder,   \
     data_encoder, default_gasprice, default_startgas
 from pyethapp.rpc_client import JSONRPCClient
-from tinyrpc.protocols.jsonrpc import JSONRPCProtocol
 from pyethapp.profiles import PROFILES
 from pyethapp.pow_service import PoWService
-from ethereum.tools import _solidity
-from ethereum.abi import event_id, normalize_name
 from pyethapp.rpc_client import ContractProxy
+from pyethapp.utils import to_comparable_logs
 
 ethereum.tools.keys.PBKDF2_CONSTANTS['c'] = 100  # faster key derivation
 log = get_logger('test.jsonrpc')  # pylint: disable=invalid-name
@@ -54,11 +59,11 @@ SOLIDITY_AVAILABLE = 'solidity' in Compilers().compilers
 #
 # (compiled with online Solidity compiler at https://chriseth.github.io/browser-solidity/ version
 # 0.1.1-34172c3b/RelWithDebInfo-Emscripten/clang/int)
-LOG_EVM = (
+LOG_EVM = decode_hex(
     '606060405260448060116000396000f30060606040523615600d57600d565b60425b7f5e7df75d54'
     'e493185612379c616118a4c9ac802de621b010c96f74d22df4b30a60405180905060405180910390'
     'a15b565b00'
-).decode('hex')
+)
 
 
 def test_externally():
@@ -222,7 +227,7 @@ def test_app(request, tmpdir):
             'max_peers': 0,
             'listen_port': 29873
         },
-        'node': {'privkey_hex': mk_random_privkey().encode('hex')},
+        'node': {'privkey_hex': encode_hex(mk_random_privkey())},
         'discovery': {
             'boostrap_nodes': [],
             'listen_port': 29873
@@ -234,9 +239,9 @@ def test_app(request, tmpdir):
                 'BLOCK_DIFF_FACTOR': 2,  # greater than difficulty, thus difficulty is constant
                 'GENESIS_GAS_LIMIT': 3141592,
                 'GENESIS_INITIAL_ALLOC': {
-                    tester.accounts[0].encode('hex'): {'balance': 10 ** 24},
-                    tester.accounts[1].encode('hex'): {'balance': 1},
-                    tester.accounts[2].encode('hex'): {'balance': 10 ** 24},
+                    encode_hex(tester.accounts[0]): {'balance': 10 ** 24},
+                    encode_hex(tester.accounts[1]): {'balance': 1},
+                    encode_hex(tester.accounts[2]): {'balance': 10 ** 24},
                 }
             }
         },
@@ -554,19 +559,19 @@ def test_send_transaction(test_app):
     chain = chainservice.chain
     hc = chainservice.head_candidate
     state = State(hc.state_root, chain.env)
-    assert state.get_balance('\xff' * 20) == 0
+    assert state.get_balance(b'\xff' * 20) == 0
     sender = test_app.services.accounts.unlocked_accounts[0].address
     assert state.get_balance(sender) > 0
     tx = {
         'from': address_encoder(sender),
-        'to': address_encoder('\xff' * 20),
+        'to': address_encoder(b'\xff' * 20),
         'value': quantity_encoder(1)
     }
     tx_hash = data_decoder(test_app.client.call('eth_sendTransaction', tx))
     test_app.mine_next_block()
     assert len(chain.head.transactions) == 1
     assert tx_hash == chain.head.transactions[0].hash
-    assert chain.state.get_balance('\xff' * 20) == 1
+    assert chain.state.get_balance(b'\xff' * 20) == 1
 
     # send transactions from account which can't pay gas
     tx['from'] = address_encoder(test_app.services.accounts.unlocked_accounts[1].address)
@@ -589,14 +594,14 @@ def main(a,b):
     tx = {
         'from': address_encoder(sender),
         'to': address_encoder(tx_to),
-        'data': evm_code.encode('hex')
+        'data': encode_hex(evm_code)
     }
     data_decoder(test_app.client.call('eth_sendTransaction', tx))
     assert len(chainservice.head_candidate.transactions) == 1
     creates = chainservice.head_candidate.transactions[0].creates
 
     candidate_state_dict = State(chainservice.head_candidate.state_root, chain.env).to_dict()
-    code = candidate_state_dict[creates.encode('hex')]['code']
+    code = candidate_state_dict[encode_hex(creates)]['code']
     assert len(code) > 2
     assert code != '0x'
 
@@ -605,7 +610,7 @@ def main(a,b):
     assert len(chain.head.transactions) == 1
     creates = chain.head.transactions[0].creates
     state_dict = State(chain.head.state_root, chain.env).to_dict()
-    code = state_dict[creates.encode('hex')]['code']
+    code = state_dict[encode_hex(creates)]['code']
     assert len(code) > 2
     assert code != '0x'
 
@@ -631,7 +636,7 @@ def main(a,b):
     creates = chainservice.head_candidate.transactions[0].creates
 
     candidate_state_dict = State(chainservice.head_candidate.state_root, chain.env).to_dict()
-    code = candidate_state_dict[creates.encode('hex')]['code']
+    code = candidate_state_dict[encode_hex(creates)]['code']
     assert len(code) > 2
     assert code != '0x'
 
@@ -640,7 +645,7 @@ def main(a,b):
     assert len(chain.head.transactions) == 1
     creates = chain.head.transactions[0].creates
     state_dict = State(chain.head.state_root, chain.env).to_dict()
-    code = state_dict[creates.encode('hex')]['code']
+    code = state_dict[encode_hex(creates)]['code']
     assert len(code) > 2
     assert code != '0x'
 
@@ -650,7 +655,7 @@ def test_pending_transaction_filter(test_app):
     assert test_app.client.call('eth_getFilterChanges', filter_id) == []
     tx = {
         'from': address_encoder(test_app.services.accounts.unlocked_accounts[0].address),
-        'to': address_encoder('\xff' * 20)
+        'to': address_encoder(b'\xff' * 20)
     }
 
     sequences = [
@@ -777,7 +782,8 @@ def test_get_logs(test_app):
         'fromBlock': quantity_encoder(n0),
         'toBlock': 'pending'
     })
-    assert sorted(logs7) == sorted(logs3 + logs6 + logs1)
+    assert to_comparable_logs(logs7) == \
+        to_comparable_logs(logs3 + logs6 + logs1)
 
 
 def test_get_filter_changes(test_app):
@@ -871,8 +877,9 @@ def test_get_filter_changes(test_app):
     })
     tx_hashes.append(test_app.client.call('eth_sendTransaction', tx))
     logs.append(test_app.client.call('eth_getFilterChanges', range_filter_id))
-    assert sorted(logs[-1]) == sorted(logs_in_range + [pending_log])
 
+    assert to_comparable_logs(logs[-1]) == \
+        to_comparable_logs(logs_in_range + [pending_log])
 
 def test_eth_nonce(test_app):
     """

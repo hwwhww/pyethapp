@@ -43,6 +43,7 @@ install_requires = [install_requires_replacements.get(r, r) for r in install_req
 dependency_links = [
     'https://github.com/ethereum/serpent/tarball/develop#egg=ethereum-serpent-9.99.9',
     'https://github.com/ethereum/pydevp2p/tarball/develop#egg=devp2p-9.99.9',
+    'https://github.com/ethereum/pyethereum/tarball/develop#egg=ethereum-9.99.9',
 ]
 
 if os.environ.get("USE_PYETHEREUM_DEVELOP"):

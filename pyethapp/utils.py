@@ -4,6 +4,7 @@ import signal
 import warnings
 from collections import Mapping
 import os
+from functools import total_ordering
 
 import click
 import ethereum
@@ -168,3 +169,20 @@ def enable_greenlet_debugger():
             os.kill(os.getpid(), signal.SIGTERM)
 
     gevent.get_hub().__class__.print_exception = _print_exception
+
+
+@total_ordering
+class MinType(object):
+    """ Return Min value for sorting comparison
+ 
+    This class is used for comparing unorderded types. e.g., NoneType
+    """
+    def __le__(self, other):
+        return True
+
+    def __eq__(self, other):
+        return (self is other)
+
+
+def to_comparable_logs(logs):
+    return sorted(set(x) for x in logs)

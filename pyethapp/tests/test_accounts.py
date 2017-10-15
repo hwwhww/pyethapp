@@ -6,6 +6,10 @@ from uuid import uuid4
 import ethereum.tools.keys
 from ethereum.tools.keys import privtoaddr
 from ethereum.transactions import Transaction
+from ethereum.utils import (
+    decode_hex,
+    encode_hex,
+)
 from pyethapp.accounts import Account
 import pytest
 
@@ -15,7 +19,7 @@ ethereum.tools.keys.PBKDF2_CONSTANTS['c'] = 100
 
 @pytest.fixture()
 def privkey():
-    return 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'.decode('hex')
+    return decode_hex('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855')
 
 
 @pytest.fixture()
@@ -50,7 +54,7 @@ def test_account_creation(account, password, privkey, uuid):
 def test_locked(keystore, uuid):
     account = Account(keystore)
     assert account.locked
-    assert account.address.encode('hex') == keystore['address']
+    assert encode_hex(account.address) == keystore['address']
     assert account.privkey is None
     assert account.pubkey is None
     assert account.uuid == uuid
@@ -123,7 +127,7 @@ def test_dump(account):
     keystore = json.loads(account.dump(include_address=True, include_id=True))
     required_keys = set(['crypto', 'version'])
     assert set(keystore.keys()) == required_keys | set(['address', 'id'])
-    assert keystore['address'] == account.address.encode('hex')
+    assert keystore['address'] == encode_hex(account.address)
     assert keystore['id'] == account.uuid
 
     keystore = json.loads(account.dump(include_address=False, include_id=True))
@@ -132,7 +136,7 @@ def test_dump(account):
 
     keystore = json.loads(account.dump(include_address=True, include_id=False))
     assert set(keystore.keys()) == required_keys | set(['address'])
-    assert keystore['address'] == account.address.encode('hex')
+    assert keystore['address'] == encode_hex(account.address)
 
     keystore = json.loads(account.dump(include_address=False, include_id=False))
     assert set(keystore.keys()) == required_keys
