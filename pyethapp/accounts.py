@@ -1,5 +1,5 @@
 from builtins import hex
-from builtins import str
+# from builtins import str
 from builtins import object
 import json
 import os
@@ -68,10 +68,10 @@ class Account(object):
         """
         if key is None:
             key = mk_random_privkey()
-        if isinstance(key, str):
-            key = key.encode()
-        if isinstance(password, str):
-            password = password.encode()
+        if not is_string(key):
+            key = to_string(key)
+        if not is_string(key):
+            password = to_string(password)
 
         keystore = keys.make_keystore_json(key, password)
         keystore['id'] = uuid
