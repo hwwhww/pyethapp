@@ -6,6 +6,7 @@ from builtins import map
 from builtins import range
 from builtins import object
 import os
+import sys
 import inspect
 from copy import deepcopy
 from collections import Iterable
@@ -53,6 +54,10 @@ def _fail_on_error_dispatch(self, request):
     result = method(*request.args, **request.kwargs)
     return request.respond(result)
 
+
+def is_json_string(data):
+    return (sys.version_info >= (3,) and isinstance(data, str)) or \
+        (sys.version_info.major == 2 and isinstance(data, unicode))
 
 PROPAGATE_ERRORS = False
 if PROPAGATE_ERRORS:
@@ -354,9 +359,8 @@ class Subdispatcher(object):
 
 def quantity_decoder(data):
     """Decode `data` representing a quantity."""
-    # [NOTE] check it! 
-    # if not is_string(data):
-    if not isinstance(data, str):
+    # [NOTE]: decode to `str` for both python2 and python3
+    if not is_json_string(data):
         success = False
     elif not data.startswith('0x'):
         success = False  # must start with 0x prefix
@@ -379,7 +383,7 @@ def quantity_encoder(i):
     """Encode integer quantity `data`."""
     assert is_numeric(i)
     data = int_to_big_endian(i)
-    return '0x' + (encode_hex(data).lstrip('0') or '0')
+    return str('0x' + (encode_hex(data).lstrip('0') or '0'))
 
 
 def data_decoder(data):
@@ -406,9 +410,9 @@ def data_encoder(data, length=None):
     """
     s = encode_hex(data)
     if length is None:
-        return '0x' + s
+        return str('0x' + s)
     else:
-        return '0x' + s.rjust(length * 2, '0')
+        return str('0x' + s.rjust(length * 2, '0'))
 
 
 def address_decoder(data):
@@ -421,7 +425,7 @@ def address_decoder(data):
 
 def address_encoder(address):
     assert len(address) in (20, 0)
-    result =  '0x' + encode_hex(address)
+    result =  str('0x' + encode_hex(address))
     return result
 
 def block_id_decoder(data):
