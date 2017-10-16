@@ -355,8 +355,8 @@ class Subdispatcher(object):
 def quantity_decoder(data):
     """Decode `data` representing a quantity."""
     # [NOTE] check it! 
-    # if not is_string(data):
-    if not isinstance(data, str):
+    if not is_string(data):
+    # if not isinstance(data, str):
         success = False
     elif not data.startswith('0x'):
         success = False  # must start with 0x prefix
@@ -1469,7 +1469,7 @@ class LogFilter(object):
             self.last_block_checked = blocks_to_check[-2] if len(blocks_to_check) >= 2 else None
         if self.last_block_checked and not isinstance(self.last_block_checked, Block):
             self.last_block_checked = self.chain.get_block(self.last_block_checked)
-        actually_new_ids = new_logs.keys() - self.log_dict.keys()
+        actually_new_ids = list(set(new_logs.keys()) - set(self.log_dict.keys()))
         self.log_dict.update(new_logs)
         return {id_: new_logs[id_] for id_ in actually_new_ids}
 

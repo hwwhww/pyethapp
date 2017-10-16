@@ -134,6 +134,9 @@ class LevelDB(BaseDB):
             return True
         except KeyError:
             return False
+        except Exception as e:
+            log.info('key: {}, type(key):{}'.format(key, type(key)))
+            raise
 
     def __contains__(self, key):
         return self._has_key(key)
