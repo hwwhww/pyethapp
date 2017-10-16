@@ -51,7 +51,7 @@ if os.environ.get("USE_PYETHEREUM_DEVELOP"):
     devp2p_ref='c55ae4ec7f8441353dba39ba307236a2891a847a'
     dependency_links.append('http://github.com/hwwhww/pydevp2p/tarball/%s#egg=devp2p-9.99.9' % devp2p_ref)
 
-    pyethereum_ref = 'c8d4dcd0963b2f95ebbc16e0a0021b1d7867ceb1'
+    pyethereum_ref = 'dfba04549a5f82a8c1631e2df8a2754bfc9d2222'
     dependency_links.append('http://github.com/hwwhww/pyethereum/tarball/%s#egg=ethereum-9.99.9' % pyethereum_ref)
 
 # *IMPORTANT*: Don't manually change the version here. Use the 'bump2version' utility.
