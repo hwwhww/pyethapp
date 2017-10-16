@@ -3,16 +3,17 @@ sudo: required
 dist: trusty
 python:
 - '2.7'
+- '3.6'
 before_install:
 - sudo add-apt-repository -y ppa:ethereum/ethereum
 - sudo apt-get update
 - sudo apt-get install -y solc
 install:
+- pip install tox-travis
 - python setup.py install
 - pip install coveralls readme_renderer
 script:
-- coverage run --source pyethapp setup.py test
-- python setup.py check --restructuredtext --strict
+- tox
 after_success:
 - coveralls
 env:
