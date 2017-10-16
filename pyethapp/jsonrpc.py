@@ -355,8 +355,8 @@ class Subdispatcher(object):
 def quantity_decoder(data):
     """Decode `data` representing a quantity."""
     # [NOTE] check it! 
-    if not is_string(data):
-    # if not isinstance(data, str):
+    # if not is_string(data):
+    if not isinstance(data, str):
         success = False
     elif not data.startswith('0x'):
         success = False  # must start with 0x prefix

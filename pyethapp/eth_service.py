@@ -521,7 +521,7 @@ class ChainService(WiredService):
             except KeyError:
                 origin_hash = b''
         if not origin_hash or self.chain.has_blockhash(origin_hash):
-            log.debug("unknown block")
+            log.debug('unknown block: {}'.format(origin_hash))
             proto.send_blockheaders(*[])
             return
 
@@ -531,7 +531,7 @@ class ChainService(WiredService):
                 break
             try:
                 block_rlp = self.chain.db.get(last)
-                if block_rlp == 'GENESIS':
+                if block_rlp == b'GENESIS':
                     #last = self.chain.genesis.header.prevhash
                     break
                 else:
