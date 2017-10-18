@@ -147,10 +147,11 @@ class PoWService(BaseService):
         self.hashrate = hashrate
 
     def recv_found_nonce(self, bin_nonce, mixhash, mining_hash):
-        log.info('nonce found', mining_hash=mining_hash.encode('hex'))
+        log.info('nonce found: {}'.format(encode_hex(mining_hash)))
         block = self.chain.head_candidate
         if block.mining_hash != mining_hash:
             log.warn('mining_hash does not match')
+            gevent.spawn_later(0.5, self.mine_head_candidate)
             return False
         block.header.mixhash = mixhash
         block.header.nonce = bin_nonce
