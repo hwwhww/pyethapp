@@ -397,6 +397,64 @@ class ChainService(WiredService):
         else:
             log.debug('already broadcasted tx')
 
+    def query_headers(self, hash_mode, max_hashes, skip, reverse, origin_hash=None, number=None):
+        headers = []
+        unknown = False
+        while not unknown and len(headers) < max_hashes:
+            if hash_mode:
+                if not origin_hash:
+                    break
+                block = self.chain.get_block(origin_hash)
+                if not block:
+                    break
+                # If reached genesis, stop
+                if block.number == 0:
+                    break
+                origin = block.header
+            else:
+                # If reached genesis, stop
+                if number is None or number == 0:
+                    break
+                block = self.chain.get_block_by_number(number)
+                if block is None:
+                    break
+                origin = block.header
+
+            headers.append(origin)
+
+            if hash_mode:  # hash traversal
+                if reverse:
+                    for i in range(skip+1):
+                        try:
+                            block = self.chain.get_block(origin_hash)
+                            if block:
+                                origin_hash = block.prevhash
+                            else:
+                                unknown = True
+                                break
+                        except KeyError:
+                            unknown = True
+                            break
+                else:
+                    blockhash = self.chain.get_blockhash_by_number(origin.number + skip + 1)
+                    try:
+                        # block = self.chain.get_block(blockhash)
+                        if block and self.chain.get_blockhashes_from_hash(blockhash, skip+1)[skip] == origin_hash:
+                            origin_hash = blockhash
+                        else:
+                            unknown = True
+                    except KeyError:
+                        unknown = True
+            else:  # number traversal
+                if reverse:
+                    if number >= (skip + 1):
+                        number -= (skip + 1)
+                    else:
+                        unknown = True
+                else:
+                    number += (skip + 1)
+        return headers
+
     # wire protocol receivers ###########
 
     def on_wire_protocol_start(self, proto):
@@ -512,59 +570,19 @@ class ChainService(WiredService):
                 origin_hash = self.chain.get_blockhash_by_number(hash_or_number[1])
             except KeyError:
                 origin_hash = b''
-        if not origin_hash or self.chain.has_blockhash(origin_hash):
-            log.debug("unknown block")
+        if not origin_hash or not self.chain.has_blockhash(origin_hash):
+            log.debug('unknown block: {}'.format(encode_hex(origin_hash)))
             proto.send_blockheaders(*[])
             return
 
-        unknown = False
-        while not unknown and (headers) < max_hashes:
-            if not origin_hash:
-                break
-            try:
-                block_rlp = self.chain.db.get(last)
-                if block_rlp == 'GENESIS':
-                    #last = self.chain.genesis.header.prevhash
-                    break
-                else:
-                    last = rlp.decode_lazy(block_rlp)[0][0]  # [head][prevhash]
-            except KeyError:
-                break
-            assert origin
-            headers.append(origin)
-
-            if hash_mode:  # hash traversal
-                if reverse:
-                    for i in xrange(skip+1):
-                        try:
-                            header = self.chain.get_block(origin_hash)
-                            origin_hash = header.prevhash
-                        except KeyError:
-                            unknown = True
-                            break
-                else:
-                    origin_hash = self.chain.get_blockhash_by_number(origin.number + skip + 1)
-                    try:
-                        header = self.chain.get_block(origin_hash)
-                        if self.chain.get_blockhashes_from_hash(header.hash, skip+1)[skip] == origin_hash:
-                            origin_hash = header.hash
-                        else:
-                            unknown = True
-                    except KeyError:
-                        unknown = True
-            else:  # number traversal
-                if reverse:
-                    if origin.number >= (skip+1):
-                        number = origin.number - (skip + 1)
-                        origin_hash = self.chain.get_blockhash_by_number(number)
-                    else:
-                        unknown = True
-                else:
-                    number = origin.number + skip + 1
-                    try:
-                        origin_hash = self.chain.get_blockhash_by_number(number)
-                    except KeyError:
-                        unknown = True
+        headers = self.query_headers(
+            hash_mode,
+            max_hashes,
+            skip,
+            reverse,
+            origin_hash=origin_hash,
+            number=block_id,
+        )
 
         log.debug("sending: found blockheaders", count=len(headers))
         proto.send_blockheaders(*headers)
@@ -590,7 +608,7 @@ class ChainService(WiredService):
         found = []
         for bh in blockhashes[:self.wire_protocol.max_getblocks_count]:
             try:
-                found.append(self.chain.db.get(bh))
+                found.append(self.chain.get_block(bh))
             except KeyError:
                 log.debug("unknown block requested", block_hash=encode_hex(bh))
         if found:

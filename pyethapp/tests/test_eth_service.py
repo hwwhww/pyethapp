@@ -170,3 +170,72 @@ def make_transaction(key, nonce, value, to):
     tx = Transaction(nonce, gasprice, startgas, to, value, data, v, r, s)
     tx.sign(key)
     return tx
+
+
+def test_query_headers(test_app):
+    test_chain = tester.Chain()
+    test_chain.mine(30)
+
+    chainservice = test_app.chain
+    chainservice.chain = test_chain.chain
+
+    # query_headers(hash_mode, origin_hash, max_hashes, skip, reverse)
+    # case 1-1: hash_mode and reverse
+    headers = chainservice.query_headers(
+        1,
+        5,
+        0,
+        True,
+        origin_hash=test_chain.chain.get_block_by_number(10).hash,
+    )
+    assert len(headers) == 5
+    assert headers[0].number == 10
+    assert headers[-1].number == 6
+
+    # case 1-2: hash_mode and reverse, reach genesis
+    headers = chainservice.query_headers(
+        1,
+        20,
+        0,
+        True,
+        origin_hash=test_chain.chain.get_block_by_number(10).hash,
+    )
+    assert len(headers) == 10
+    assert headers[0].number == 10
+    assert headers[-1].number == 1
+
+    # case 2: hash_mode and not reverse
+    headers = chainservice.query_headers(
+        1,
+        5,
+        0,
+        False,
+        origin_hash=test_chain.chain.get_block_by_number(10).hash,
+    )
+    assert len(headers) == 5
+    assert headers[0].number == 10
+    assert headers[-1].number == 14
+
+    # case 3: number mode and reverse
+    headers = chainservice.query_headers(
+        0,
+        5,
+        0,
+        True,
+        number=10,
+    )
+    assert len(headers) == 5
+    assert headers[0].number == 10
+    assert headers[-1].number == 6
+
+    # case 4: number mode and not reverse
+    headers = chainservice.query_headers(
+        0,
+        5,
+        0,
+        False,
+        number=10,
+    )
+    assert len(headers) == 5
+    assert headers[0].number == 10
+    assert headers[-1].number == 14
