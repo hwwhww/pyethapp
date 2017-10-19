@@ -10,7 +10,7 @@ before_install:
 - sudo apt-get install -y solc
 install:
 - pip install tox-travis
-- USE_PYETHEREUM_DEVELOP=1 python setup.py install
+- python setup.py install
 - pip install coveralls readme_renderer
 script:
 - tox
